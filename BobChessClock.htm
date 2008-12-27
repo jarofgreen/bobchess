@@ -22,16 +22,32 @@ Revision $Revision$ checked in $Date$
 <head>
 <title>Bob The Chess Clock</title>
 <script>
+// holds the time the currently running clock started
 var LastTouch = false;
+// holds how much time each player has left in milliseconds
 var players = new Array(0,0);
+// current state, -1 before start, -2 all over, 0 or 1: player moving
 var moving = -1;
+// pointer to timer that updates screen so it can be stopped later
 var timer = false;
+// fischer mode
+var fischerSecs = 0;
+var fischerBefore = false;
+var fischerAfter = false;
 
 function startMatch() {
-	var time = parseInt(document.getElementById('Hrs').value)*60*60 + parseInt(document.getElementById('Mins').value)*60 + parseInt(document.getElementById('Secs').value);
+	var time = parseInt(document.getElementById('Hrs').value)*60*60 
+		+ parseInt(document.getElementById('Mins').value)*60
+		+ parseInt(document.getElementById('Secs').value);
 
 	players[0] = time * 1000;
 	players[1] = time * 1000;
+
+	if (document.getElementById('Fischer').checked) {
+		fischerSecs = parseInt(document.getElementById('FischerSecs').value) * 1000;
+		var ele = document.getElementById('FischerMode');
+		if (ele.options[ele.selectedIndex].value == "0") { fischerBefore = true; } else { fischerAfter = true; }
+	}
 
 	document.getElementById('start').style.display = 'none';
 	document.getElementById('play').style.display = 'block';
@@ -64,17 +80,21 @@ function renderTime(seconds, running) {
 function clickPlayer(player) {
 	if (moving == -2) { return; }
 	else if (player == moving) {
+		// normal move
 		var now = new Date();
 		players[moving] = players[moving] - (now.getTime() - LastTouch.getTime());
+		if (fischerAfter) players[moving] = players[moving] + fischerSecs;
 		LastTouch = new Date();
 		if (player == 1 ) { moving = 0; } else { moving = 1; }
+		if (fischerBefore) players[moving] = players[moving] + fischerSecs;
 		update();
 	} else if (moving == -1) {
 		// we are starting the match
 		document.onkeyup = key;
-		LastTouch = new Date();
 		moving = player;
+		if (fischerBefore) players[moving] = players[moving] + fischerSecs;
 		timer = setInterval("update()",400);
+		LastTouch = new Date();
 		update();
 	}
 }
@@ -101,6 +121,8 @@ function key(e) {
 <h1>bobChess Online Chess Clock</h1>
 <p>Please set time.</p>
 <p><input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
+<p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
+<p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
 <p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 <p>Click one of the clocks to start. Press a number or letter key on one side of the keyboard to switch clock. Hit Refresh to return to this screen again.</p>
 <p>This is open souce. <a href="http://code.google.com/p/bobchess/">Visit the home page here</a>.</p>

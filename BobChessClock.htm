@@ -40,11 +40,20 @@ function startMatch() {
 		+ parseInt(document.getElementById('Mins').value)*60
 		+ parseInt(document.getElementById('Secs').value);
 
+	if (isNaN(time)) {
+		alert('We could not parse the time you requested as a recognised number. Please try again.');
+		return;
+	}
+
 	players[0] = time * 1000;
 	players[1] = time * 1000;
 
 	if (document.getElementById('Fischer').checked) {
 		fischerSecs = parseInt(document.getElementById('FischerSecs').value) * 1000;
+		if (isNaN(fischerSecs)) {
+			alert('We could not parse the number of seconds you requested for Fischer mode as a recognised number. Please try again.');
+			return;
+		}
 		var ele = document.getElementById('FischerMode');
 		if (ele.options[ele.selectedIndex].value == "0") { fischerBefore = true; } else { fischerAfter = true; }
 	}

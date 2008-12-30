@@ -21,6 +21,9 @@ Revision $Revision$ checked in $Date$
 
 <head>
 <title>Bob The Chess Clock</title>
+<style type="text/css">
+h1 { text-align: center; font-family: sans-serif; }
+</style>
 <script>
 var LastTouch;
 var players;
@@ -151,7 +154,7 @@ function reset() {
 You seem not to have JavaScript enabled. Without it,  <a href="http://code.google.com/p/bobchess/">BobChess</a> will not run. 
 </div>
 
-<div id="play" style="display: none; height:90%; width: 90%;">
+<div id="play" style="text-align: center; display: none; height:90%; width: 90%;">
 <input type="button" style=" font-size:300%; width:45%; height:90%; text-align: left; background-color: black; color: white; padding: 10px;" id="player1" onclick="clickPlayer(0);">
 <input type="button" style=" font-size:300%; width:45%; height:90%; text-align: right; padding: 10px;" id="player2" onclick="clickPlayer(1);">
 <br>
@@ -160,13 +163,12 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 
 <div id="start" style="display: none;">
 <h1>bobChess Online Chess Clock</h1>
-<p>Please set time.</p>
-<p><input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
+<p>Start Time: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
 <p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
 <p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
 <p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 <p>Click one of the clocks to start. Press a number or letter key on one side of the keyboard to switch clock.</p>
-<p>This is open souce. <a href="http://code.google.com/p/bobchess/">Visit the home page here</a>.</p>
+<p><em>This is open souce. <a href="http://code.google.com/p/bobchess/">Visit the home page here</a>.</em></p>
 </div>
 
 

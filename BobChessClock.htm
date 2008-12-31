@@ -142,10 +142,29 @@ function key(e) {
 
 function keyDoNothing(e) {}
 
-
 function reset() {
 	if (confirm('Are you sure you want to reset the current game?')) init();
 }
+
+var pauseStarted;
+
+function startPause() {
+	if (moving == 0 || moving == 1) {
+		stopTimer();
+		pauseStarted = new Date();
+		document.getElementById('play').style.display = 'none';
+		document.getElementById('paused').style.display = 'block';
+	}
+}
+
+function endPause() {
+	document.getElementById('paused').style.display = 'none';
+	document.getElementById('play').style.display = 'block';
+	var now = new Date();
+	LastTouch.setTime(LastTouch.getTime() + (now.getTime() - pauseStarted.getTime()));	
+	timer = setInterval("update()",400);
+}
+
 </script>
 </head>
 <body onload="init();">
@@ -159,6 +178,7 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 <input type="button" style=" font-size:300%; width:45%; height:90%; text-align: right; padding: 10px;" id="player2" onclick="clickPlayer(1);">
 <br>
 (<a href="#" onclick="reset(); return false;">reset timers</a>) 
+(<a href="#" onclick="startPause(); return false;">pause</a>)
 </div>
 
 <div id="start" style="display: none;">
@@ -169,6 +189,10 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 <p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 <p>Click one of the clocks to start. Press a number or letter key on one side of the keyboard to switch clock.</p>
 <p><em>This is open souce. <a href="http://code.google.com/p/bobchess/">Visit the home page here</a>.</em></p>
+</div>
+
+<div id="paused" style=" display: none; text-align: center;">
+The clocks are paused. <a href="#" onclick="endPause(); return false;">Start clocks again</a>.
 </div>
 
 

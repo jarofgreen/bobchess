@@ -33,6 +33,7 @@ var timer;
 var fischerSecs;
 var fischerBefore;
 var fischerAfter;
+var timeWarningSecs;
 
 function stopTimer() {
 	if (timer == undefined) return;
@@ -41,8 +42,10 @@ function stopTimer() {
 }
 
 function init() {
+	// in case we are half way throught a game now, stop the various code stuff
 	stopTimer();
 	document.onkeyup = keyDoNothing;
+	// display proper screen
 	document.getElementById('start').style.display = 'block';
         document.getElementById('nojs').style.display = 'none';
         document.getElementById('play').style.display = 'none';
@@ -56,30 +59,48 @@ function init() {
 	fischerSecs = 0;
 	fischerBefore = false;
 	fischerAfter = false;
+	// warn by turning clocks red when there a certain number of seconds left, 0 to disable.
+	timeWarningSecs = 0;
+	// set ui to normal colours
+	document.getElementById('player1').style.color = 'white';
+	document.getElementById('player2').style.color = 'black';
 }
 
 function startMatch() {
-	var time = parseInt(document.getElementById('Hrs').value)*60*60 
-		+ parseInt(document.getElementById('Mins').value)*60
-		+ parseInt(document.getElementById('Secs').value);
-
+	// calculate start time
+	var time = Math.max(0,parseInt(document.getElementById('Hrs').value))*60*60 
+		+ Math.max(0,parseInt(document.getElementById('Mins').value))*60
+		+ Math.max(0,parseInt(document.getElementById('Secs').value));
 	if (isNaN(time)) {
 		alert('We could not parse the time you requested as a recognised number. Please try again.');
 		return;
 	}
-
+	if (time < 1) {
+		alert('You must set some time on the clocks. Please try again.');
+		return;
+	}
 	players[0] = time * 1000;
 	players[1] = time * 1000;
 
+	// Fischer options
 	if (document.getElementById('Fischer').checked) {
-		fischerSecs = parseInt(document.getElementById('FischerSecs').value) * 1000;
+		fischerSecs = Math.max(0,parseInt(document.getElementById('FischerSecs').value)) * 1000;
 		if (isNaN(fischerSecs)) {
 			alert('We could not parse the number of seconds you requested for Fischer mode as a recognised number. Please try again.');
 			return;
 		}
 		var ele = document.getElementById('FischerMode');
 		if (ele.options[ele.selectedIndex].value == "0") { fischerBefore = true; } else { fischerAfter = true; }
-	}
+	} else { fischerSecs = 0; }
+
+	// Time Warning Options
+	if (document.getElementById('TimeWarning').checked) {
+		timeWarningSecs = Math.max(0,parseInt(document.getElementById('TimeWarningSecs').value));
+		if (isNaN(timeWarningSecs)) {
+                        alert('We could not parse the number of seconds you requested a warning at as a recognised number. Please try again.');
+                        return;
+		}
+	} else { timeWarningSecs = 0; }
 
 	document.getElementById('start').style.display = 'none';
 	document.getElementById('play').style.display = 'block';
@@ -92,6 +113,11 @@ function update() {
 	if (moving == 0 || moving == 1) {
 		var now = new Date();
 		timenow[moving] = timenow[moving] - parseInt((now.getTime() - LastTouch.getTime()));
+
+		// the +1000 is so that the timer turns red on the time set, and not just when below the time set.
+		if (timeWarningSecs > 0 && timenow[moving] < (timeWarningSecs * 1000 + 1000)) {
+			document.getElementById('player'+(moving+1)).style.color = 'red';
+		}
 	}
 
 	// if match has ended .......
@@ -102,8 +128,9 @@ function update() {
 	document.getElementById('player2').value = renderTime(timenow[1], (moving == 1));
 }
 
-function renderTime(seconds, running) {
-	seconds = seconds / 1000;
+function renderTime(milliseconds, running) {
+	if (milliseconds < 1) { return 'Out of Time'; }
+	var seconds = milliseconds / 1000;
 	var out = parseInt(seconds / (60*60))+":"+parseInt((seconds / 60)%60)+":"+parseInt(seconds%60);
 	if (running) { out = "* "+out + " *"; }
 	return out;
@@ -175,7 +202,7 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 </noscript>
 
 <div id="play" style="text-align: center; display: none; height:90%; width: 90%;">
-<input type="button" style=" font-size:300%; width:45%; height:90%; text-align: left; background-color: black; color: white; padding: 10px;" id="player1" onclick="clickPlayer(0);">
+<input type="button" style=" font-size:300%; width:45%; height:90%; text-align: left; background-color: black; padding: 10px;" id="player1" onclick="clickPlayer(0);">
 <input type="button" style=" font-size:300%; width:45%; height:90%; text-align: right; padding: 10px;" id="player2" onclick="clickPlayer(1);">
 <br>
 (<a href="#" onclick="reset(); return false;">reset timers</a>) 
@@ -188,6 +215,7 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 <p>Start Time: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
 <p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
 <p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
+<p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" value="5" size="2"> seconds left.</p>
 <p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 </form>
 <p>Click one of the clocks to start. Press a number or letter key on one side of the keyboard to switch clock.</p>

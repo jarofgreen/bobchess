@@ -23,6 +23,7 @@ Revision $Revision$ checked in $Date$
 <title>Bob The Chess Clock</title>
 <style type="text/css">
 h1 { text-align: center; font-family: sans-serif; }
+fieldset{ width: 70%; margin: 0px auto; }
 </style>
 <script>
 var LastTouch;
@@ -263,9 +264,9 @@ function onPageLoad() {
 You seem not to have JavaScript enabled. Without it,  <a href="http://code.google.com/p/bobchess/">BobChess</a> will not run. 
 </noscript>
 
-<div id="play" style="text-align: center; display: none; height:90%; width: 90%;">
-<input type="button" style=" font-size:300%; width:45%; height:90%; text-align: left; background-color: black; padding: 10px;" id="player1" onclick="clickPlayer(0);">
-<input type="button" style=" font-size:300%; width:45%; height:90%; text-align: right; padding: 10px;" id="player2" onclick="clickPlayer(1);">
+<div id="play" style="text-align: center; display: none; height:99%; width: 99%;">
+<input type="button" style=" font-size:300%; width:49%; height:90%; text-align: left; background-color: black; padding: 10px;" id="player1" onclick="clickPlayer(0);">
+<input type="button" style=" font-size:300%; width:49%; height:90%; text-align: right; padding: 10px;" id="player2" onclick="clickPlayer(1);">
 <br>
 (<a href="#" onclick="reset(); return false;">reset timers</a>) 
 (<a href="#" onclick="startPause(); return false;">pause</a>)
@@ -274,14 +275,23 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 <div id="start" style="display: none;">
 <h1>bobChess Online Chess Clock</h1>
 <form>
+<p>Click one of the clocks to start. Press a number or letter key on one side of the keyboard to switch clock.</p>
+<fieldset>
+<legend>Start Time</legend>
 <p>Start Time: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
+</fieldset>
+<fieldset>
+<legend>Mode</legend>
 <p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
 <p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
+</fieldset>
+<fieldset>
+<legend>Warning</legend>
 <p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" value="5" size="2"> seconds left.</p>
+</fieldset>
 <p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 </form>
-<p>Click one of the clocks to start. Press a number or letter key on one side of the keyboard to switch clock.</p>
-<p><em>This is open souce. <a href="http://code.google.com/p/bobchess/">Visit the home page here</a>.</em></p>
+<p><em>This is open souce. <a href="http://code.google.com/p/bobchess/">Visit the project home page here</a>.</em></p>
 </div>
 
 <div id="paused" style=" display: none; text-align: center;">

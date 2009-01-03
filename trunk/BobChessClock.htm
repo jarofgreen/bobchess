@@ -67,6 +67,7 @@ function init() {
 }
 
 function startMatch() {
+	// storing prefs in cookies as we go so we can load them later .......
 	// calculate start time
 	var time = Math.max(0,parseInt(document.getElementById('Hrs').value))*60*60 
 		+ Math.max(0,parseInt(document.getElementById('Mins').value))*60
@@ -79,19 +80,30 @@ function startMatch() {
 		alert('You must set some time on the clocks. Please try again.');
 		return;
 	}
+	setCookie('time',time);
 	players[0] = time * 1000;
 	players[1] = time * 1000;
 
 	// Fischer options
 	if (document.getElementById('Fischer').checked) {
-		fischerSecs = Math.max(0,parseInt(document.getElementById('FischerSecs').value)) * 1000;
+		fischerSecs = Math.max(0,parseInt(document.getElementById('FischerSecs').value));
 		if (isNaN(fischerSecs)) {
 			alert('We could not parse the number of seconds you requested for Fischer mode as a recognised number. Please try again.');
 			return;
 		}
+		setCookie('fischerSecs',fischerSecs);
 		var ele = document.getElementById('FischerMode');
-		if (ele.options[ele.selectedIndex].value == "0") { fischerBefore = true; } else { fischerAfter = true; }
-	} else { fischerSecs = 0; }
+		if (ele.options[ele.selectedIndex].value == "0") { 
+			fischerBefore = true; 
+			setCookie('fischer','before');
+		} else { 
+			fischerAfter = true; 
+			setCookie('fischer','after');
+		}
+	} else { 
+		fischerSecs = 0; 
+		setCookie('fischer','none');
+	}
 
 	// Time Warning Options
 	if (document.getElementById('TimeWarning').checked) {
@@ -100,7 +112,12 @@ function startMatch() {
                         alert('We could not parse the number of seconds you requested a warning at as a recognised number. Please try again.');
                         return;
 		}
-	} else { timeWarningSecs = 0; }
+                setCookie('timeWarningSecs',timeWarningSecs);
+                setCookie('timeWarning','on');
+	} else { 
+		timeWarningSecs = 0; 
+		setCookie('timeWarning','off');
+	}
 
 	document.getElementById('start').style.display = 'none';
 	document.getElementById('play').style.display = 'block';
@@ -142,10 +159,10 @@ function clickPlayer(player) {
 		// normal move
 		var now = new Date();
 		players[moving] = players[moving] - (now.getTime() - LastTouch.getTime());
-		if (fischerAfter) players[moving] = players[moving] + fischerSecs;
+		if (fischerAfter) players[moving] = players[moving] + fischerSecs * 1000;
 		LastTouch = new Date();
 		if (player == 1 ) { moving = 0; } else { moving = 1; }
-		if (fischerBefore) players[moving] = players[moving] + fischerSecs;
+		if (fischerBefore) players[moving] = players[moving] + fischerSecs * 1000;
 		update();
 	} else if (moving == -1) {
 		// we are starting the match
@@ -192,9 +209,54 @@ function endPause() {
 	timer = setInterval("update()",400);
 }
 
+function setCookie(name,value) {
+	var date = new Date();
+	date.setTime(date.getTime()+(100*24*60*60*1000));
+	document.cookie = "bc"+name+"="+value+"; expires="+date.toGMTString();
+}
+
+function getCookie(name) {
+        var cookieBits = document.cookie.split(';');
+        for(var i=0;i < cookieBits.length;i++) {
+                var cookie = cookieBits[i];
+                while (cookie.charAt(0)==' ') cookie = cookie.substring(1,cookie.length);
+                if (cookie.indexOf('bc'+name+'=') == 0) return cookie.substring(1+2+name.length,cookie.length);
+	}
+}
+
+function onPageLoad() {
+	// start time
+	var time = getCookie('time');
+	if (!isNaN(time) && time > 0) {
+		document.getElementById('Hrs').value = parseInt(time / (60*60)); 
+		document.getElementById('Mins').value = (parseInt(time / 60)%60);
+		document.getElementById('Secs').value = parseInt(time%60);
+	}
+
+	// fischer
+	if (getCookie('fischer') == 'before') {
+		document.getElementById('Fischer').checked = true;
+	}
+	if (getCookie('fischer') == 'after') {
+		document.getElementById('Fischer').checked = true;
+		document.getElementById('FischerMode').selectedIndex = 1;
+	}
+	if (getCookie('fischerSecs')) document.getElementById('FischerSecs').value = getCookie('fischerSecs');
+
+	// time warnings
+	var warning = parseInt(getCookie('timeWarningSecs'));
+	if (!isNaN(warning) && warning > 0) {
+		document.getElementById('TimeWarningSecs').value = warning;
+		document.getElementById('TimeWarning').checked = true;
+	}
+        if (getCookie('timeWarning') == 'off') {
+                document.getElementById('TimeWarning').checked = false;
+        }
+}
+
 </script>
 </head>
-<body onload="init();">
+<body onload="init(); onPageLoad();">
 
 <div id="nojs"> Loading, please wait ...  </div>
 <noscript>

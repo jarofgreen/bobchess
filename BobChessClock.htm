@@ -35,6 +35,7 @@ var fischerSecs;
 var fischerBefore;
 var fischerAfter;
 var timeWarningSecs;
+var bronsteinSecs;
 
 function stopTimer() {
 	if (timer == undefined) return;
@@ -60,6 +61,8 @@ function init() {
 	fischerSecs = 0;
 	fischerBefore = false;
 	fischerAfter = false;
+	// bronstein mode
+	bronsteinSecs = 0;
 	// warn by turning clocks red when there a certain number of seconds left, 0 to disable.
 	timeWarningSecs = 0;
 	// set ui to normal colours
@@ -104,6 +107,20 @@ function startMatch() {
 	} else { 
 		fischerSecs = 0; 
 		setCookie('fischer','none');
+	}
+
+	// Bronstein
+	if (document.getElementById('Bronstein').checked) {
+		bronsteinSecs = Math.max(0,parseInt(document.getElementById('BronsteinSecs').value));
+		if (isNaN(bronsteinSecs)) {
+			alert('We could not parse the number of seconds you requested for Bronstein mode as a recognised number. Please try again.');
+			return;
+		}
+		setCookie('bronsteinSecs',bronsteinSecs);
+		setCookie('bronstein','on');
+	} else {
+		setCookie('bronstein','off');
+		bronsteinSecs = 0;
 	}
 
 	// Time Warning Options
@@ -158,17 +175,24 @@ function clickPlayer(player) {
 	if (moving == -2) { return; }
 	else if (player == moving) {
 		// normal move
+		// calculate diff, apply
 		var now = new Date();
-		players[moving] = players[moving] - (now.getTime() - LastTouch.getTime());
-		if (fischerAfter) players[moving] = players[moving] + fischerSecs * 1000;
-		LastTouch = new Date();
+		var diff = now.getTime() - LastTouch.getTime();
+		players[moving] = players[moving] - diff;
+		// modes that add time after move
+		if (bronsteinSecs > 0) players[moving] = players[moving] + Math.min(diff, bronsteinSecs*1000);
+		else if (fischerAfter) players[moving] = players[moving] + fischerSecs * 1000;
+		// switch players
 		if (player == 1 ) { moving = 0; } else { moving = 1; }
+		// modes that add time before a move
 		if (fischerBefore) players[moving] = players[moving] + fischerSecs * 1000;
 		// we may have now added enought time that we have to turn clocks from red back to original colour ...
 		if (timeWarningSecs > 0) {
 			if (players[0] >= (timeWarningSecs * 1000 + 1000)) document.getElementById('player1').style.color = 'white';
 			if (players[1] >= (timeWarningSecs * 1000 + 1000)) document.getElementById('player2').style.color = 'black';
 		}
+		// set up for this move, and ui.
+		LastTouch = new Date();
 		update();
 	} else if (moving == -1) {
 		// we are starting the match
@@ -258,6 +282,13 @@ function onPageLoad() {
 	}
 	if (getCookie('fischerSecs')) document.getElementById('FischerSecs').value = getCookie('fischerSecs');
 
+	// bronstein
+	var b = parseInt(getCookie('bronsteinSecs'));
+	if (!isNaN(b) && b > 0) {
+		document.getElementById('BronsteinSecs').value = b;
+	}
+	if (getCookie('bronstein') == 'on') document.getElementById('Bronstein').checked = true;
+
 	// time warnings
 	var warning = parseInt(getCookie('timeWarningSecs'));
 	if (!isNaN(warning) && warning > 0) {
@@ -298,6 +329,7 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 <legend>Mode</legend>
 <p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
 <p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
+<p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds.
 </fieldset>
 <fieldset>
 <legend>Warning</legend>

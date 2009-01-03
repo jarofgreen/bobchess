@@ -164,6 +164,11 @@ function clickPlayer(player) {
 		LastTouch = new Date();
 		if (player == 1 ) { moving = 0; } else { moving = 1; }
 		if (fischerBefore) players[moving] = players[moving] + fischerSecs * 1000;
+		// we may have now added enought time that we have to turn clocks from red back to original colour ...
+		if (timeWarningSecs > 0) {
+			if (players[0] >= (timeWarningSecs * 1000 + 1000)) document.getElementById('player1').style.color = 'white';
+			if (players[1] >= (timeWarningSecs * 1000 + 1000)) document.getElementById('player2').style.color = 'black';
+		}
 		update();
 	} else if (moving == -1) {
 		// we are starting the match

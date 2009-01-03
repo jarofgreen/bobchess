@@ -168,7 +168,7 @@ function clickPlayer(player) {
 		// we are starting the match
 		document.onkeyup = key;
 		moving = player;
-		if (fischerBefore) players[moving] = players[moving] + fischerSecs;
+		if (fischerBefore) players[moving] = players[moving] + fischerSecs * 1000;
 		timer = setInterval("update()",400);
 		LastTouch = new Date();
 		update();

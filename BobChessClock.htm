@@ -199,7 +199,7 @@ function reset() {
 var pauseStarted;
 
 function startPause() {
-	if (moving == 0 || moving == 1) {
+	if ((moving == 0 || moving == 1) && !pauseStarted) {
 		stopTimer();
 		pauseStarted = new Date();
 		document.getElementById('play').style.display = 'none';
@@ -212,8 +212,17 @@ function endPause() {
 	document.getElementById('play').style.display = 'block';
 	var now = new Date();
 	LastTouch.setTime(LastTouch.getTime() + (now.getTime() - pauseStarted.getTime()));	
+	pauseStarted = false;
 	timer = setInterval("update()",400);
 }
+
+function confirmExit() {
+	if (moving == 0 || moving == 1) {
+		startPause();
+		return 'Are you sure you want to navagiate away from this page? This will lose the current game.';
+	}
+}
+window.onbeforeunload = confirmExit;
 
 function setCookie(name,value) {
 	var date = new Date();

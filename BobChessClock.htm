@@ -88,6 +88,26 @@ function startMatch() {
 	players[0] = time * 1000;
 	players[1] = time * 1000;
 
+	if (document.getElementById('DiffStartTimes').checked) {
+		var timerhp = Math.max(0,parseInt(document.getElementById('HrsRHP').value))*60*60
+			+ Math.max(0,parseInt(document.getElementById('MinsRHP').value))*60
+			+ Math.max(0,parseInt(document.getElementById('SecsRHP').value));
+		if (isNaN(timerhp)) {
+			alert('We could not parse the time you requested as a recognised number. Please try again.');
+			return;
+		}
+		if (timerhp < 1) {
+			alert('You must set some time for the right hand player. Please try again.');
+			return;
+		}
+		players[1] = timerhp * 1000;
+		setCookie('diffTimes','y');
+		setCookie('timeRHP',timerhp);
+	} else {
+		setCookie('diffTimes','n');
+		setCookie('timeRHP',0);
+	}
+
 	// Fischer options
 	if (document.getElementById('Fischer').checked) {
 		fischerSecs = Math.max(0,parseInt(document.getElementById('FischerSecs').value));
@@ -272,6 +292,20 @@ function onPageLoad() {
 		document.getElementById('Secs').value = parseInt(time%60);
 	}
 
+	if (getCookie('diffTimes') == 'y') {
+		document.getElementById('DiffStartTimes').checked = time;
+		diffStartTimesForm(true);
+		var timerhp = getCookie('timeRHP');
+		if (!isNaN(timerhp) && timerhp > 0) {
+			document.getElementById('HrsRHP').value = parseInt(timerhp / (60*60));
+			document.getElementById('MinsRHP').value = (parseInt(timerhp / 60)%60);
+			document.getElementById('SecsRHP').value = parseInt(timerhp%60);
+		}
+	} else {
+		document.getElementById('DiffStartTimes').checked = false;
+		diffStartTimesForm(false);
+	}
+
 	// fischer
 	if (getCookie('fischer') == 'before') {
 		document.getElementById('Fischer').checked = true;
@@ -300,6 +334,18 @@ function onPageLoad() {
         }
 }
 
+function diffStartTimesForm(show) {
+	if (show) {
+		document.getElementById('StartTimeForRightPlayer').style.display = 'block';
+		document.getElementById('ForLHSPlayerLabel').style.display = 'inline';
+		document.getElementById('HrsRHP').value = document.getElementById('Hrs').value;
+		document.getElementById('MinsRHP').value = document.getElementById('Mins').value;
+		document.getElementById('SecsRHP').value = document.getElementById('Secs').value;
+	} else {
+		document.getElementById('StartTimeForRightPlayer').style.display = 'none';
+		document.getElementById('ForLHSPlayerLabel').style.display = 'none';
+	}
+}
 </script>
 </head>
 <body onload="init(); onPageLoad();">
@@ -323,7 +369,9 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 <p>Click one of the clocks to start. Press a number or letter key on one side of the keyboard to switch clock.</p>
 <fieldset>
 <legend>Start Time</legend>
-<p>Start Time: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
+<p>Start Time <span id="ForLHSPlayerLabel" style="display: none;">for left hand player</span>: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
+<p id="StartTimeForRightPlayer" style="display: none;">Start Time for right hand player: <input type=text id="HrsRHP" size="2" value="0">hrs:<input type=text id="MinsRHP" size="2" value="5">mins:<input type=text id="SecsRHP" size="2" value="00">secs</p>
+<p><input type="checkbox" id="DiffStartTimes" onclick="diffStartTimesForm(this.checked);"><label for="DiffStartTimes">Different times for each player</label></p>
 </fieldset>
 <fieldset>
 <legend>Mode</legend>

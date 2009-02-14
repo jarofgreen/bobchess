@@ -23,7 +23,7 @@ Revision $Revision$ checked in $Date$
 <title>Bob The Chess Clock</title>
 <style type="text/css">
 h1 { text-align: center; font-family: sans-serif; }
-fieldset{ width: 70%; margin: 0px auto; }
+div#start { width: 70%; margin: 0px auto; }
 </style>
 <script>
 var LastTouch;
@@ -366,7 +366,13 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 <div id="start" style="display: none;">
 <h1>bobChess Online Chess Clock</h1>
 <form>
-<p>Click one of the clocks to start. Press a number or letter key on one side of the keyboard to switch clock.</p>
+<fieldset>
+<legend>Instructions</legend>
+<p>Set the options you want below and click "Start". Two buttons will appear, with the times displayed.</p>
+<p>To start the clocks running click on either one of them. The clock you click on will start counting down, and this will be marked by * signs.</p>
+<p>When a players clock is running, they can press a number or letter key on their side of the keyboard or click their clock with the mouse to end their go and start their opponents clock running.</p>
+<p>There is a pause button on the bottom of the screen.</p>
+</fieldset>
 <fieldset>
 <legend>Start Time</legend>
 <p>Start Time <span id="ForLHSPlayerLabel" style="display: none;">for left hand player</span>: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
@@ -380,8 +386,9 @@ You seem not to have JavaScript enabled. Without it,  <a href="http://code.googl
 <p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds.
 </fieldset>
 <fieldset>
-<legend>Warning</legend>
+<legend>Options</legend>
 <p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" value="5" size="2"> seconds left.</p>
+<p>Keyboard Layout: <select><option>QWERTY UK/American</option></select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
 </fieldset>
 <p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 </form>

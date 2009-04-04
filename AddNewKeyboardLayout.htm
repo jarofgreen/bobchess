@@ -1,0 +1,82 @@
+<html>
+<!--
+http://code.google.com/p/bobchess/
+Copyright (C) 2009 James (james at doubtlesshouse dot org dot uk)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Revision $Revision$ checked in $Date$
+                                                            -->
+
+<head>
+<title>Add New Keyboard Layout to Bob The Chess Clock</title>
+<style type="text/css">
+h1 { text-align: center; font-family: sans-serif; }
+</style>
+<script>
+function genOut() {
+	var out =  'if (';
+	out += getCodeFor(document.getElementById('left').value);
+	out += ') {<br>clickPlayer(0);<br>} else if (';
+	out += getCodeFor(document.getElementById('right').value);
+	out += '){<br>clickPlayer(1);<br>}';
+	document.getElementById('output').innerHTML = out;
+}
+function getCodeFor(inStr) {
+	var out = '';
+	for(var i=0; i<inStr.length; i++) {
+		// todo: pick up repeat codes
+		var code = (inStr.charAt(i)+'').charCodeAt(0);
+		if (code > 32) {
+			if (out) { out += " || "; }
+			out += " k == "+code;
+			// small to caps
+			if (code > 96 && code < 123) {  out += " || k == "+(code-32); } 
+			// caps to small
+			if (code > 64 && code < 91) {   out += " || k == "+(code+32); }
+		}
+	}
+	return out;
+}
+</script>
+</head>
+<body>
+
+<noscript>
+You seem not to have JavaScript enabled. Without it,  <a href="http://code.google.com/p/bobchess/">BobChess</a> will not run. 
+</noscript>
+
+<h1>Add New Keyboard Layout to Bob The Chess Clock</h1>
+
+<form>
+<fieldset>
+<legend>Instructions</legend>
+Draw an imaginary line down the middle of your keyboard. In the left hand box, press every key that falls to the left of this line. In the right hand box,  press every key that falls to the right  of this line. It doesn't matter if Caps lock is on or off, but don't use the Shift key for anything. When done. create a new issue <a href="http://code.google.com/p/bobchess/issues/list" target="_new">at our official site</a> telling us what keyboard layout this is for and copy and pasting the code from the output box.
+</fieldset>
+<fieldset>
+<legend>Left Hand Player</legend>
+<input type="text" id="left" style="width:100%" onkeyup="genOut();">
+</fieldset>
+<fieldset>
+<legend>Right Hand Player</legend>
+<input type="text" id="right" style="width:100%"  onkeyup="genOut();">
+</fieldset>
+<fieldset>
+<legend>Output</legend>
+<div id="output"></div>
+</fieldset>
+</form>
+
+</body>
+</html>

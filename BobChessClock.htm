@@ -1,7 +1,7 @@
 <html>
 <!--
 http://code.google.com/p/bobchess/
-Copyright (C) 2008 James (james at doubtlesshouse dot org dot uk)
+Copyright (C) 2008, 2009 James (james at doubtlesshouse dot org dot uk)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -371,57 +371,59 @@ function diffStartTimesForm(show) {
 </head>
 <body onload="init(); onPageLoad();">
 
-<div id="nojs"> Loading, please wait ...  </div>
+<div id="nojs">
+	 Loading, please wait ... 
+</div>
 <noscript>
-You seem not to have JavaScript enabled. Without it,  <a href="http://code.google.com/p/bobchess/">BobChess</a> will not run. 
+	You seem not to have JavaScript enabled. Without it,  <a href="http://code.google.com/p/bobchess/">BobChess</a> will not run. 
 </noscript>
 
 <div id="play" style="text-align: center; display: none; height:99%; width: 99%;">
-<input type="button" style=" font-size:300%; width:49%; height:90%; text-align: left; background-color: #222; padding: 10px;" id="player1" onclick="clickPlayer(0);">
-<input type="button" style=" font-size:300%; width:49%; height:90%; text-align: right; background-color: #ccc; padding: 10px;" id="player2" onclick="clickPlayer(1);">
-<br>
-(<a href="#" onclick="reset(); return false;">reset timers</a>) 
-(<a href="#" onclick="startPause(); return false;">pause</a>)
+	<input type="button" style=" font-size:300%; width:49%; height:90%; text-align: left; background-color: #222; padding: 10px;" id="player1" onclick="clickPlayer(0);">
+	<input type="button" style=" font-size:300%; width:49%; height:90%; text-align: right; background-color: #ccc; padding: 10px;" id="player2" onclick="clickPlayer(1);">
+	<br>
+	(<a href="#" onclick="reset(); return false;">reset timers</a>) 
+	(<a href="#" onclick="startPause(); return false;">pause</a>)
 </div>
 
 <div id="start" style="display: none;">
-<h1>bobChess Online Chess Clock</h1>
-<form>
-<fieldset>
-<legend>Instructions</legend>
-<p>Set the options you want below and click "Start". Two buttons will appear, with the times displayed.</p>
-<p>To start the clocks running click on either one of them. The clock you click on will start counting down, and this will be marked by * signs.</p>
-<p>When a players clock is running, they can press a number or letter key on their side of the keyboard or click their clock with the mouse to end their go and start their opponents clock running.</p>
-<p>There is a pause button on the bottom of the screen.</p>
-</fieldset>
-<fieldset>
-<legend>Start Time</legend>
-<p>Start Time <span id="ForLHSPlayerLabel" style="display: none;">for left hand player</span>: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
-<p id="StartTimeForRightPlayer" style="display: none;">Start Time for right hand player: <input type=text id="HrsRHP" size="2" value="0">hrs:<input type=text id="MinsRHP" size="2" value="5">mins:<input type=text id="SecsRHP" size="2" value="00">secs</p>
-<p><input type="checkbox" id="DiffStartTimes" onclick="diffStartTimesForm(this.checked);"><label for="DiffStartTimes">Different times for each player</label></p>
-</fieldset>
-<fieldset>
-<legend>Mode</legend>
-<p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
-<p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
-<p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds.
-</fieldset>
-<fieldset>
-<legend>Options</legend>
-<p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" value="5" size="2"> seconds left.</p>
-<p>Keyboard Layout: 
-<select id="KbLayout" onchange="keyboardLayout = this.value; setCookie('kbLayout',this.value);">
-	<option value="uk-qwerty" selected>UK/USA</option>
-	<option value="uk-dvorak">UK/USA Dvorak</option>
-</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
-</fieldset>
-<p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
-</form>
-<p><em>This is open souce. <a href="http://code.google.com/p/bobchess/">Find out more here</a>. If you want to download a copy of this program to use when not connected to the internet, simply select 'file' and 'save' in your web browser.</em></p>
+	<h1>bobChess Online Chess Clock</h1>
+	<form>
+		<fieldset>
+			<legend>Instructions</legend>
+			<p>Set the options you want below and click "Start". Two buttons will appear, with the times displayed.</p>
+			<p>To start the clocks running click on either one of them. The clock you click on will start counting down, and this will be marked by * signs.</p>
+			<p>When a players clock is running, they can press a number or letter key on their side of the keyboard or click their clock with the mouse to end their go and start their opponents clock running.</p>
+			<p>There is a pause button on the bottom of the screen.</p>
+		</fieldset>
+		<fieldset>
+			<legend>Start Time</legend>
+			<p>Start Time <span id="ForLHSPlayerLabel" style="display: none;">for left hand player</span>: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
+			<p id="StartTimeForRightPlayer" style="display: none;">Start Time for right hand player: <input type=text id="HrsRHP" size="2" value="0">hrs:<input type=text id="MinsRHP" size="2" value="5">mins:<input type=text id="SecsRHP" size="2" value="00">secs</p>
+			<p><input type="checkbox" id="DiffStartTimes" onclick="diffStartTimesForm(this.checked);"><label for="DiffStartTimes">Different times for each player</label></p>
+		</fieldset>
+		<fieldset>
+			<legend>Mode</legend>
+			<p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
+			<p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
+			<p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds.
+		</fieldset>
+		<fieldset>
+			<legend>Options</legend>
+			<p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" value="5" size="2"> seconds left.</p>
+			<p>Keyboard Layout: 
+			<select id="KbLayout" onchange="keyboardLayout = this.value; setCookie('kbLayout',this.value);">
+				<option value="uk-qwerty" selected>UK/USA</option>
+				<option value="uk-dvorak">UK/USA Dvorak</option>
+			</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
+		</fieldset>
+		<p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
+	</form>
+	<p><em>This is open souce. <a href="http://code.google.com/p/bobchess/">Find out more here</a>. If you want to download a copy of this program to use when not connected to the internet, simply select 'file' and 'save' in your web browser.</em></p>
 </div>
 
 <div id="paused" style=" display: none; text-align: center;">
-The clocks are paused. <a href="#" onclick="endPause(); return false;">Start clocks again</a>.
+	The clocks are paused. <a href="#" onclick="endPause(); return false;">Start clocks again</a>.
 </div>
 
 

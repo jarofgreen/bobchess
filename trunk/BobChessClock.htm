@@ -209,10 +209,10 @@ function update() {
 
 function renderTime(milliseconds) {
 	if (milliseconds < 1) { return 'Lose'; }
-	var seconds = milliseconds / 1000;
-	if (seconds > 60*60) {
+	var seconds = parseInt(milliseconds / 1000);
+	if (seconds >= 60*60) {
 		return parseInt(seconds / (60*60))+":"+zeropad((seconds / 60)%60)+":"+zeropad(seconds%60);
-	} else if ( seconds > 60) {
+	} else if ( seconds >= 60) {
 		return parseInt(seconds / 60)+":"+zeropad(seconds%60);
 	} else {
 		return parseInt(seconds);

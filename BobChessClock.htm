@@ -36,6 +36,7 @@ var fischerBefore;
 var fischerAfter;
 var timeWarningSecs;
 var bronsteinSecs;
+var simpleDelaySecs;
 var keyboardLayout = "uk-qwerty";
 
 function stopTimer() {
@@ -64,6 +65,8 @@ function init() {
 	fischerAfter = false;
 	// bronstein mode
 	bronsteinSecs = 0;
+	// simple delay mode
+	simpleDelaySecs = 0;	
 	// warn by turning clocks red when there a certain number of seconds left, 0 to disable.
 	timeWarningSecs = 0;
 	// set ui to normal colours and size
@@ -146,6 +149,21 @@ function startMatch() {
 		bronsteinSecs = 0;
 	}
 
+	// simpleDelaySeconds
+        if (document.getElementById('SimpleDelay').checked) {
+                simpleDelaySecs = Math.max(0,parseInt(document.getElementById('SimpleDelaySecs').value));
+                if (isNaN(simpleDelaySecs)) {
+                        alert('We could not parse the number of seconds you requested for Simple Delay mode as a recognised number. Please try again.');
+                        return;
+                }
+                setCookie('simpleDelaySecs',simpleDelaySecs);
+                setCookie('simpleDelay','on');
+        } else {
+                setCookie('simpleDelay','off');
+                simpleDelaySecs = 0;
+        }
+
+
 	// Time Warning Options
 	if (document.getElementById('TimeWarning').checked) {
 		timeWarningSecs = Math.max(0,parseInt(document.getElementById('TimeWarningSecs').value));
@@ -170,7 +188,9 @@ function update() {
 	var timenow = new Array(players[0],players[1]);
 	if (moving == 0 || moving == 1) {
 		var now = new Date();
-		timenow[moving] = timenow[moving] - parseInt((now.getTime() - LastTouch.getTime()));
+		var diff = now.getTime() - LastTouch.getTime() - simpleDelaySecs*1000;
+		if (diff < 0) diff = 0;
+		timenow[moving] = timenow[moving] - diff;
 
 		// the +1000 is so that the timer turns red on the time set, and not just when below the time set.
 		if (timeWarningSecs > 0 && timenow[moving] < (timeWarningSecs * 1000 + 1000)) {
@@ -209,7 +229,8 @@ function clickPlayer(player) {
 		// normal move
 		// calculate diff, apply
 		var now = new Date();
-		var diff = now.getTime() - LastTouch.getTime();
+		var diff = now.getTime() - LastTouch.getTime() - simpleDelaySecs*1000;
+		if (diff < 0) diff = 0;
 		players[moving] = players[moving] - diff;
 		// modes that add time after move
 		if (bronsteinSecs > 0) players[moving] = players[moving] + Math.min(diff, bronsteinSecs*1000);
@@ -347,6 +368,14 @@ function onPageLoad() {
 	}
 	if (getCookie('bronstein') == 'on') document.getElementById('Bronstein').checked = true;
 
+	// simple delay
+        var sd = parseInt(getCookie('simpleDelaySecs'));
+        if (!isNaN(sd) && sd > 0) {
+                document.getElementById('SimpleDelaySecs').value = sd;
+        }
+        if (getCookie('simpleDelay') == 'on') document.getElementById('SimpleDelay').checked = true;
+
+
 	// time warnings
 	var warning = parseInt(getCookie('timeWarningSecs'));
 	if (!isNaN(warning) && warning > 0) {
@@ -420,6 +449,7 @@ function diffStartTimesForm(show) {
 			<legend>Mode</legend>
 			<p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
 			<p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
+			<p><input type="radio" name="Mode" id="SimpleDelay"><label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2"> seconds before starting.</p>
 			<p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds.
 		</fieldset>
 		<fieldset>

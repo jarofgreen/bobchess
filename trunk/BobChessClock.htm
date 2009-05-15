@@ -22,8 +22,7 @@ Revision $Revision$ checked in $Date$
 <head>
 <title>Bob The Chess Clock</title>
 <style type="text/css">
-h1 { text-align: center; font-family: sans-serif; }
-div#start { width: 70%; margin: 0px auto; }
+h1 { color: #400000; text-align: center; font-family: sans-serif; }
 fieldset { padding: 10px; }
 </style>
 <script>
@@ -431,15 +430,16 @@ function diffStartTimesForm(show) {
 </div>
 
 <div id="start" style="display: none;">
-	<h1>bobChess Online Chess Clock</h1>
+	<h1>BobChess Online Chess Clock</h1>
 	<form>
-		<fieldset>
-			<legend>Instructions</legend>
-			<p>Set the options you want below and click "Start". Two buttons will appear, with the times displayed.</p>
+		<div style="margin: 10px; float: right; width: 20%; padding: 10px; background-color: #400000; color: white; ">
+			<strong>Instructions</strong>
+			<p>Set the options you want and click "Start". Two buttons will appear, with the times displayed.</p>
 			<p>To start the clocks running click on either one of them. The clock you click on will start counting down.</p>
 			<p>When a players clock is running, they can press a number or letter key on their side of the keyboard or click their clock with the mouse to end their go and start their opponents clock running.</p>
 			<p>There is a pause button on the bottom of the screen.</p>
-		</fieldset>
+			<p><em>This is Open Source. If you want to download a copy of this program to use when not connected to the internet, simply select 'file' and 'save' in your web browser. <a href="http://code.google.com/p/bobchess/" style="color: white;">Find out more here</a></em></p>
+		</div>
 		<fieldset>
 			<legend>Start Time</legend>
 			<p>Start Time <span id="ForLHSPlayerLabel" style="display: none;">for left hand player</span>: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
@@ -453,6 +453,7 @@ function diffStartTimesForm(show) {
 			<p><input type="radio" name="Mode" id="SimpleDelay"><label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2"> seconds before starting.</p>
 			<p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds.
 		</fieldset>
+		<p><input style="font-size: 200%; padding: 10px" value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 		<fieldset>
 			<legend>Options</legend>
 			<p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" value="5" size="2"> seconds left.</p>
@@ -462,9 +463,7 @@ function diffStartTimesForm(show) {
 				<option value="uk-dvorak">UK/USA Dvorak</option>
 			</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
 		</fieldset>
-		<p><input value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 	</form>
-	<p><em>This is open souce. <a href="http://code.google.com/p/bobchess/">Find out more here</a>. If you want to download a copy of this program to use when not connected to the internet, simply select 'file' and 'save' in your web browser.</em></p>
 </div>
 
 <div id="paused" style=" display: none; text-align: center;">

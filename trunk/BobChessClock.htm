@@ -494,11 +494,24 @@ function diffStartTimesForm(show) {
 			<legend>Mode</legend>
 			<p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
 			<span id="errorFischer" class="error"></span>
-			<p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <span id="ForRHSPlayerFischer"  style="display: none;"> for the left hand player and <input type="text" id="FischerSecsRHP" value="5" size="2"> seconds for the right hand player</span> <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
+			<p>
+				<input type="radio" name="Mode" id="Fischer">
+				<label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2" onchange="document.getElementById('Fischer').checked = true;"> seconds 
+				<span id="ForRHSPlayerFischer"  style="display: none;"> for the left hand player and <input type="text" id="FischerSecsRHP" value="5" size="2" onchange="document.getElementById('Fischer').checked = true;"> seconds for the right hand player</span> 
+				<select id="FischerMode" onchange="document.getElementById('Fischer').checked = true;"><option value=0>Before</option><option value=1>After</option></select> every move.
+			</p>
 			<span id="errorSimpleDelay" class="error"></span>
-			<p><input type="radio" name="Mode" id="SimpleDelay"><label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2"> seconds <span id="ForRHSPlayerSimpleDelay"  style="display: none;">for the left hand player and <input type="text" id="SimpleDelaySecsRHP" value="5" size="2"> seconds for the right hand player</span> before starting.</p>
+			<p>
+				<input type="radio" name="Mode" id="SimpleDelay">
+				<label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2" onchange="document.getElementById('SimpleDelay').checked = true;"> seconds 
+				<span id="ForRHSPlayerSimpleDelay"  style="display: none;">for the left hand player and <input type="text" id="SimpleDelaySecsRHP" value="5" size="2" onchange="document.getElementById('SimpleDelay').checked = true;"> seconds for the right hand player</span> before starting.
+			</p>
 			<span id="errorBronstein" class="error"></span>
-			<p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds <span id="ForRHSPlayerBronstein"  style="display: none;">for the left hand player and <input type="text" id="BronsteinSecsRHP" size="2" value="5"> seconds for the right hand player</span>.
+			<p>
+				<input type="radio" name="Mode" id="Bronstein">
+				<label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5" onchange="document.getElementById('Bronstein').checked = true;"> seconds 
+				<span id="ForRHSPlayerBronstein"  style="display: none;">for the left hand player and <input type="text" id="BronsteinSecsRHP" size="2" value="5" onchange="document.getElementById('Bronstein').checked = true;"> seconds for the right hand player</span>.
+			</p>
 		</fieldset>
 		<p><input style="font-size: 200%; padding: 10px" value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 		<fieldset>

@@ -32,12 +32,12 @@ var moving;
 // pointer to timer that updates screen so it can be stopped later
 var timer;
 var fischerSecs;
-var fischerBefore;
-var fischerAfter;
 var timeWarningSecs;
 var bronsteinSecs;
 var simpleDelaySecs;
 var keyboardLayout = "uk-qwerty";
+var differentTimeForEachPlayer = false;
+var mode;
 
 function stopTimer() {
 	if (timer == undefined) return;
@@ -59,14 +59,14 @@ function init() {
 	players = new Array(0,0);
 	// current state, -1 before start, -2 all over, 0 or 1: player moving
 	moving = -1;
+	// mode: normal, or one of the special modes
+	mode = undefined;
 	// fischer mode
-	fischerSecs = 0;
-	fischerBefore = false;
-	fischerAfter = false;
+	fischerSecs = new Array(0,0);
 	// bronstein mode
-	bronsteinSecs = 0;
+	bronsteinSecs = new Array(0,0);
 	// simple delay mode
-	simpleDelaySecs = 0;	
+	simpleDelaySecs = new Array(0,0);	
 	// warn by turning clocks red when there a certain number of seconds left, 0 to disable.
 	timeWarningSecs = 0;
 	// set ui to normal colours and size
@@ -99,7 +99,7 @@ function startMatch() {
 			+ Math.max(0,parseInt(document.getElementById('MinsRHP').value))*60
 			+ Math.max(0,parseInt(document.getElementById('SecsRHP').value));
 		if (isNaN(timerhp)) {
-			alert('We could not parse the time you requested as a recognised number. Please try again.');
+			alert('We could not parse the time you requested for the right hand player as a recognised number. Please try again.');
 			return;
 		}
 		if (timerhp < 1) {
@@ -109,9 +109,11 @@ function startMatch() {
 		players[1] = timerhp * 1000;
 		setCookie('diffTimes','y');
 		setCookie('timeRHP',timerhp);
+		differentTimeForEachPlayer = true;
 	} else {
 		setCookie('diffTimes','n');
 		setCookie('timeRHP',0);
+		differentTimeForEachPlayer = false;
 	}
 
 	// Fischer options
@@ -121,18 +123,24 @@ function startMatch() {
 			alert('We could not parse the number of seconds you requested for Fischer mode as a recognised number. Please try again.');
 			return;
 		}
-		setCookie('fischerSecs',fischerSecs);
+		fischerSecs = new Array( fischerSecs, fischerSecs );
+		if (differentTimeForEachPlayer) {
+			fischerSecs[1] = Math.max(0,parseInt(document.getElementById('FischerSecsRHP').value));
+			if (isNaN(fischerSecs[1])) {
+				 alert('We could not parse the number of seconds you requested for Fischer mode for the right hand player as a recognised number. Please try again.');
+                        	return;
+                	}
+			setCookie('fischerSecsRHP',fischerSecs[1]);
+		}
+		setCookie('fischerSecs',fischerSecs[0]);
 		var ele = document.getElementById('FischerMode');
 		if (ele.options[ele.selectedIndex].value == "0") { 
-			fischerBefore = true; 
-			setCookie('fischer','before');
+			mode = 'fischerBefore'; 
 		} else { 
-			fischerAfter = true; 
-			setCookie('fischer','after');
+			mode = 'fischerAfter'; 
 		}
 	} else { 
-		fischerSecs = 0; 
-		setCookie('fischer','none');
+		fischerSecs = new Array(0,0); 
 	}
 
 	// Bronstein
@@ -142,11 +150,19 @@ function startMatch() {
 			alert('We could not parse the number of seconds you requested for Bronstein mode as a recognised number. Please try again.');
 			return;
 		}
-		setCookie('bronsteinSecs',bronsteinSecs);
-		setCookie('bronstein','on');
+		bronsteinSecs =  new Array( bronsteinSecs, bronsteinSecs );
+		if (differentTimeForEachPlayer) {
+			bronsteinSecs[1] = Math.max(0,parseInt(document.getElementById('BronsteinSecsRHP').value));
+			if (isNaN(bronsteinSecs[1])) {
+				alert('We could not parse the number of seconds you requested for Bronstein mode for the right hand player as a recognised number. Please try again.');
+				return;
+			}
+			setCookie('bronsteinSecsRHP',bronsteinSecs[1]);
+		}
+		setCookie('bronsteinSecs',bronsteinSecs[0]);
+		mode = 'bronstein';
 	} else {
-		setCookie('bronstein','off');
-		bronsteinSecs = 0;
+		bronsteinSecs = new Array(0,0);
 	}
 
 	// simpleDelaySeconds
@@ -156,11 +172,19 @@ function startMatch() {
                         alert('We could not parse the number of seconds you requested for Simple Delay mode as a recognised number. Please try again.');
                         return;
                 }
-                setCookie('simpleDelaySecs',simpleDelaySecs);
-                setCookie('simpleDelay','on');
+		simpleDelaySecs = new Array(simpleDelaySecs,simpleDelaySecs);
+		if (differentTimeForEachPlayer) {
+			simpleDelaySecs[1] = Math.max(0,parseInt(document.getElementById('SimpleDelaySecsRHP').value));
+			if (isNaN(simpleDelaySecs[1])) {
+				alert('We could not parse the number of seconds you requested for Simple Delay mode for the right hand player as a recognised number. Please try again.');
+				return;
+			}
+			setCookie('simpleDelaySecsRHP',simpleDelaySecs[1]);
+		}
+                setCookie('simpleDelaySecs',simpleDelaySecs[0]);
+		mode = 'simpleDelay';
         } else {
-                setCookie('simpleDelay','off');
-                simpleDelaySecs = 0;
+                simpleDelaySecs = new Array(0,0);
         }
 
 
@@ -181,6 +205,7 @@ function startMatch() {
 	document.getElementById('start').style.display = 'none';
 	document.getElementById('play').style.display = 'block';
 	
+	setCookie('mode',mode);
 	update();
 }
 
@@ -188,7 +213,7 @@ function update() {
 	var timenow = new Array(players[0],players[1]);
 	if (moving == 0 || moving == 1) {
 		var now = new Date();
-		var diff = now.getTime() - LastTouch.getTime() - simpleDelaySecs*1000;
+		var diff = now.getTime() - LastTouch.getTime() - simpleDelaySecs[moving]*1000;
 		if (diff < 0) diff = 0;
 		timenow[moving] = timenow[moving] - diff;
 
@@ -229,18 +254,18 @@ function clickPlayer(player) {
 		// normal move
 		// calculate diff, apply
 		var now = new Date();
-		var diff = now.getTime() - LastTouch.getTime() - simpleDelaySecs*1000;
+		var diff = now.getTime() - LastTouch.getTime() - simpleDelaySecs[moving]*1000;
 		if (diff < 0) diff = 0;
 		players[moving] = players[moving] - diff;
 		// modes that add time after move
-		if (bronsteinSecs > 0) players[moving] = players[moving] + Math.min(diff, bronsteinSecs*1000);
-		else if (fischerAfter) players[moving] = players[moving] + fischerSecs * 1000;
+		if (mode == 'bronstein') players[moving] = players[moving] + Math.min(diff, bronsteinSecs[moving]*1000);
+		else if (mode == 'fischerAfter') players[moving] = players[moving] + fischerSecs[moving] * 1000;
 		// switch players
 		document.getElementById('player'+(moving+1)).style.fontSize='300%';
 		if (player == 1 ) { moving = 0; } else { moving = 1; }
 		document.getElementById('player'+(moving+1)).style.fontSize='800%';
 		// modes that add time before a move
-		if (fischerBefore) players[moving] = players[moving] + fischerSecs * 1000;
+		if (mode == 'fischerBefore') players[moving] = players[moving] + fischerSecs[moving] * 1000;
 		// we may have now added enought time that we have to turn clocks from red back to original colour ...
 		if (timeWarningSecs > 0) {
 			if (players[0] >= (timeWarningSecs * 1000 + 1000)) document.getElementById('player1').style.color = 'white';
@@ -255,7 +280,7 @@ function clickPlayer(player) {
 		document.onkeyup = key;
 		moving = player;
 		document.getElementById('player'+(moving+1)).style.fontSize='800%';
-		if (fischerBefore) players[moving] = players[moving] + fischerSecs * 1000;
+		if (mode == 'fischerBefore') players[moving] = players[moving] + fischerSecs[moving] * 1000;
 		timer = setInterval("update()",400);
 		LastTouch = new Date();
 		update();
@@ -352,28 +377,27 @@ function onPageLoad() {
 	}
 
 	// fischer
-	if (getCookie('fischer') == 'before') {
+	if (getCookie('mode') == 'fischerBefore') {
 		document.getElementById('Fischer').checked = true;
+		document.getElementById('FischerMode').selectedIndex = 0;
 	}
-	if (getCookie('fischer') == 'after') {
+	if (getCookie('mode') == 'fischerAfter') {
 		document.getElementById('Fischer').checked = true;
 		document.getElementById('FischerMode').selectedIndex = 1;
 	}
 	if (getCookie('fischerSecs')) document.getElementById('FischerSecs').value = getCookie('fischerSecs');
+	if (getCookie('fischerSecsRHP')) document.getElementById('FischerSecsRHP').value = getCookie('fischerSecsRHP');
 
 	// bronstein
-	var b = parseInt(getCookie('bronsteinSecs'));
-	if (!isNaN(b) && b > 0) {
-		document.getElementById('BronsteinSecs').value = b;
-	}
-	if (getCookie('bronstein') == 'on') document.getElementById('Bronstein').checked = true;
+	if (getCookie('bronsteinSecs')) document.getElementById('BronsteinSecs').value = getCookie('bronsteinSecs');
+	if (getCookie('bronsteinSecsRHP')) document.getElementById('BronsteinSecsRHP').value = getCookie('bronsteinSecsRHP');
+	if (getCookie('mode') == 'bronstein') document.getElementById('Bronstein').checked = true;
+	
 
 	// simple delay
-        var sd = parseInt(getCookie('simpleDelaySecs'));
-        if (!isNaN(sd) && sd > 0) {
-                document.getElementById('SimpleDelaySecs').value = sd;
-        }
-        if (getCookie('simpleDelay') == 'on') document.getElementById('SimpleDelay').checked = true;
+	if (getCookie('simpleDelaySecs')) document.getElementById('SimpleDelaySecs').value = getCookie('simpleDelaySecs');
+	if (getCookie('simpleDelaySecsRHP')) document.getElementById('SimpleDelaySecsRHP').value = getCookie('simpleDelaySecsRHP');
+        if (getCookie('mode') == 'simpleDelay') document.getElementById('SimpleDelay').checked = true;
 
 
 	// time warnings
@@ -402,12 +426,21 @@ function diffStartTimesForm(show) {
 	if (show) {
 		document.getElementById('StartTimeForRightPlayer').style.display = 'block';
 		document.getElementById('ForLHSPlayerLabel').style.display = 'inline';
+		document.getElementById('ForRHSPlayerFischer').style.display = 'inline';
+		document.getElementById('ForRHSPlayerSimpleDelay').style.display = 'inline';
+		document.getElementById('ForRHSPlayerBronstein').style.display = 'inline';
 		document.getElementById('HrsRHP').value = document.getElementById('Hrs').value;
 		document.getElementById('MinsRHP').value = document.getElementById('Mins').value;
 		document.getElementById('SecsRHP').value = document.getElementById('Secs').value;
+		document.getElementById('FischerSecsRHP').value = document.getElementById('FischerSecs').value;
+		document.getElementById('SimpleDelaySecsRHP').value = document.getElementById('SimpleDelaySecs').value;
+		document.getElementById('BronsteinSecsRHP').value = document.getElementById('BronsteinSecs').value;
 	} else {
 		document.getElementById('StartTimeForRightPlayer').style.display = 'none';
 		document.getElementById('ForLHSPlayerLabel').style.display = 'none';
+		document.getElementById('ForRHSPlayerFischer').style.display = 'none';
+		document.getElementById('ForRHSPlayerSimpleDelay').style.display = 'none';
+		document.getElementById('ForRHSPlayerBronstein').style.display = 'none';
 	}
 }
 </script>
@@ -449,9 +482,9 @@ function diffStartTimesForm(show) {
 		<fieldset>
 			<legend>Mode</legend>
 			<p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
-			<p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
-			<p><input type="radio" name="Mode" id="SimpleDelay"><label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2"> seconds before starting.</p>
-			<p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds.
+			<p><input type="radio" name="Mode" id="Fischer"><label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds <span id="ForRHSPlayerFischer"  style="display: none;"> for the left hand player and <input type="text" id="FischerSecsRHP" value="5" size="2"> seconds for the right hand player</span> <select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.</p>
+			<p><input type="radio" name="Mode" id="SimpleDelay"><label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2"> seconds <span id="ForRHSPlayerSimpleDelay"  style="display: none;">for the left hand player and <input type="text" id="SimpleDelaySecsRHP" value="5" size="2"> seconds for the right hand player</span> before starting.</p>
+			<p><input type="radio" name="Mode" id="Bronstein"><label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds <span id="ForRHSPlayerBronstein"  style="display: none;">for the left hand player and <input type="text" id="BronsteinSecsRHP" size="2" value="5"> seconds for the right hand player</span>.
 		</fieldset>
 		<p><input style="font-size: 200%; padding: 10px" value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 		<fieldset>

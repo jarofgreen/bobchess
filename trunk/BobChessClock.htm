@@ -388,11 +388,10 @@ function onPageLoad() {
 
 	// fischer
 	if (getCookie('mode') == 'fischerBefore') {
-		document.getElementById('Fischer').checked = true;
+		selectMode('Fischer');
 		document.getElementById('FischerMode').selectedIndex = 0;
-	}
-	if (getCookie('mode') == 'fischerAfter') {
-		document.getElementById('Fischer').checked = true;
+	} else if (getCookie('mode') == 'fischerAfter') {
+		selectMode('Fischer');
 		document.getElementById('FischerMode').selectedIndex = 1;
 	}
 	if (getCookie('fischerSecs')) document.getElementById('FischerSecs').value = getCookie('fischerSecs');
@@ -401,14 +400,12 @@ function onPageLoad() {
 	// bronstein
 	if (getCookie('bronsteinSecs')) document.getElementById('BronsteinSecs').value = getCookie('bronsteinSecs');
 	if (getCookie('bronsteinSecsRHP')) document.getElementById('BronsteinSecsRHP').value = getCookie('bronsteinSecsRHP');
-	if (getCookie('mode') == 'bronstein') document.getElementById('Bronstein').checked = true;
-	
+	if (getCookie('mode') == 'bronstein') selectMode('Bronstein');
 
 	// simple delay
 	if (getCookie('simpleDelaySecs')) document.getElementById('SimpleDelaySecs').value = getCookie('simpleDelaySecs');
 	if (getCookie('simpleDelaySecsRHP')) document.getElementById('SimpleDelaySecsRHP').value = getCookie('simpleDelaySecsRHP');
-        if (getCookie('mode') == 'simpleDelay') document.getElementById('SimpleDelay').checked = true;
-
+        if (getCookie('mode') == 'simpleDelay') selectMode('SimpleDelay');
 
 	// time warnings
 	var warning = parseInt(getCookie('timeWarningSecs'));
@@ -453,6 +450,22 @@ function diffStartTimesForm(show) {
 		document.getElementById('ForRHSPlayerBronstein').style.display = 'none';
 	}
 }
+function selectMode(newMode) {
+	// this function could be called because the user clicked something or we are setting the users last used options from their cookies. In the latter case this line is needed, but but not the former.
+	if (document.getElementById(newMode) && !document.getElementById(newMode).checked) document.getElementById(newMode).checked = true;
+	var modes = new Array('Fischer','SimpleDelay','Bronstein');
+	for (var i in modes) {
+		// avoid flickering screens, as this function is called on many events: so don't want to hide then show a split second later.
+		if (modes[i] != newMode) {
+			document.getElementById(modes[i]+'ShortText').style.display = 'inline';
+			document.getElementById(modes[i]+'Options').style.display = 'none';
+		}
+	}
+	if (newMode != 'Normal') {
+		document.getElementById(newMode+'ShortText').style.display = 'none';
+		document.getElementById(newMode+'Options').style.display = 'inline';
+	}
+}
 </script>
 </head>
 <body onload="init(); onPageLoad();">
@@ -492,25 +505,43 @@ function diffStartTimesForm(show) {
 		</fieldset>
 		<fieldset>
 			<legend>Mode</legend>
-			<p><input type="radio" name="Mode" id="NormalChess" checked="checked"><label for="NormalChess">Normal Chess Clock</label></p>
+			<p>
+				<input type="radio" name="Mode" id="NormalChess" checked="checked" onchange="if (this.checked) selectMode('Normal');" onclick="if (this.checked) selectMode('Normal');" onkeyup="if (this.checked) selectMode('Normal');">
+				<label for="NormalChess">Normal Chess Clock</label>
+			</p>
 			<span id="errorFischer" class="error"></span>
 			<p>
-				<input type="radio" name="Mode" id="Fischer">
-				<label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2" onchange="document.getElementById('Fischer').checked = true;"> seconds 
-				<span id="ForRHSPlayerFischer"  style="display: none;"> for the left hand player and <input type="text" id="FischerSecsRHP" value="5" size="2" onchange="document.getElementById('Fischer').checked = true;"> seconds for the right hand player</span> 
-				<select id="FischerMode" onchange="document.getElementById('Fischer').checked = true;"><option value=0>Before</option><option value=1>After</option></select> every move.
+				<input type="radio" name="Mode" id="Fischer" onchange="if (this.checked) selectMode('Fischer');" onclick="if (this.checked) selectMode('Fischer');" onkeyup="if (this.checked) selectMode('Fischer');">
+				<span id="FischerShortText">
+					<label for="Fischer">Fischer Clock; add some time before or after every move</label>
+				</span>
+				<span id="FischerOptions" style="display: none;">
+					<label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds 
+					<span id="ForRHSPlayerFischer"  style="display: none;"> for the left hand player and <input type="text" id="FischerSecsRHP" value="5" size="2"> seconds for the right hand player</span> 
+					<select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.
+				</span>
 			</p>
 			<span id="errorSimpleDelay" class="error"></span>
 			<p>
-				<input type="radio" name="Mode" id="SimpleDelay">
-				<label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2" onchange="document.getElementById('SimpleDelay').checked = true;"> seconds 
-				<span id="ForRHSPlayerSimpleDelay"  style="display: none;">for the left hand player and <input type="text" id="SimpleDelaySecsRHP" value="5" size="2" onchange="document.getElementById('SimpleDelay').checked = true;"> seconds for the right hand player</span> before starting.
+				<input type="radio" name="Mode" id="SimpleDelay" onchange="if (this.checked) selectMode('SimpleDelay');" onclick="if (this.checked) selectMode('SimpleDelay');" onkeyup="if (this.checked) selectMode('SimpleDelay');">
+				<span id="SimpleDelayShortText">
+					<label for="SimpleDelay">Simple Delay; every move the clock waits before starting</label>
+				</span>
+				<span id="SimpleDelayOptions" style="display: none;">
+					<label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2"> seconds 
+					<span id="ForRHSPlayerSimpleDelay"  style="display: none;">for the left hand player and <input type="text" id="SimpleDelaySecsRHP" value="5" size="2"> seconds for the right hand player</span> before starting.
+				</span>
 			</p>
 			<span id="errorBronstein" class="error"></span>
 			<p>
-				<input type="radio" name="Mode" id="Bronstein">
-				<label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5" onchange="document.getElementById('Bronstein').checked = true;"> seconds 
-				<span id="ForRHSPlayerBronstein"  style="display: none;">for the left hand player and <input type="text" id="BronsteinSecsRHP" size="2" value="5" onchange="document.getElementById('Bronstein').checked = true;"> seconds for the right hand player</span>.
+				<input type="radio" name="Mode" id="Bronstein" onchange="if (this.checked) selectMode('Bronstein');" onclick="if (this.checked) selectMode('Bronstein');" onkeyup="if (this.checked) selectMode('Bronstein');">
+				<span id="BronsteinShortText">
+					<label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a certain limit</label>
+				</span>
+				<span id="BronsteinOptions" style="display: none;">
+					<label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds 
+					<span id="ForRHSPlayerBronstein"  style="display: none;">for the left hand player and <input type="text" id="BronsteinSecsRHP" size="2" value="5"> seconds for the right hand player</span>.
+				</span>
 			</p>
 		</fieldset>
 		<p><input style="font-size: 200%; padding: 10px" value="Start The Match" type=submit onclick="startMatch(); return false;"></p>

@@ -193,8 +193,10 @@ function startMatch() {
 		}
                 setCookie('simpleDelaySecs',simpleDelaySecs[0]);
 		mode = 'simpleDelay';
+		document.getElementById('SimpleDelayDisplay').style.display='block';
         } else {
                 simpleDelaySecs = new Array(0,0);
+		document.getElementById('SimpleDelayDisplay').style.display='none';
         }
 
 
@@ -224,7 +226,17 @@ function update() {
 	if (moving == 0 || moving == 1) {
 		var now = new Date();
 		var diff = now.getTime() - LastTouch.getTime() - simpleDelaySecs[moving]*1000;
-		if (diff < 0) diff = 0;
+		if (diff < 0) {
+			document.getElementById('SimpleDelayDisplay').innerHTML = 'Delayed for '+renderTime(diff * -1);
+			if (moving == 0) { 
+				document.getElementById('SimpleDelayDisplay').style.textAlign='left';
+			} else {
+				document.getElementById('SimpleDelayDisplay').style.textAlign='right';
+			}
+			diff = 0;
+		} else {
+			document.getElementById('SimpleDelayDisplay').innerHTML = '&nbsp;';
+		}
 		timenow[moving] = timenow[moving] - diff;
 
 		// the +1000 is so that the timer turns red on the time set, and not just when below the time set.
@@ -478,8 +490,9 @@ function selectMode(newMode) {
 </noscript>
 
 <div id="play" style="text-align: center; display: none; height:99%; width: 99%;">
-	<input type="button" style=" font-size:300%; width:49%; height:90%; text-align: left; background-color: #222; padding: 10px;" id="player1" onclick="clickPlayer(0);">
-	<input type="button" style=" font-size:300%; width:49%; height:90%; text-align: right; background-color: #ccc; padding: 10px;" id="player2" onclick="clickPlayer(1);">
+	<div id="SimpleDelayDisplay" style=" font-size:200%; width:99%">&nbsp;</div> 
+	<input type="button" style=" font-size:300%; width:49%; height:70%; text-align: left; background-color: #222; padding: 10px;" id="player1" onclick="clickPlayer(0);">
+	<input type="button" style=" font-size:300%; width:49%; height:70%; text-align: right; background-color: #ccc; padding: 10px;" id="player2" onclick="clickPlayer(1);">
 	<br>
 	(<a href="#" onclick="reset(); return false;">reset timers</a>) 
 	(<a href="#" onclick="startPause(); return false;">pause</a>)

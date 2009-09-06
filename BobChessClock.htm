@@ -247,7 +247,7 @@ function update() {
 
 	// if match has ended .......
 	if (timenow[0] <= 0) { players[0] = 0; moving = -2; stopTimer(); }
-	if (timenow[1] <= 0) { players[1] - 0; moving = -2; stopTimer(); }
+	if (timenow[1] <= 0) { players[1] = 0; moving = -2; stopTimer(); }
 
 	document.getElementById('player1').value = renderTime(timenow[0]);
 	document.getElementById('player2').value = renderTime(timenow[1]);

@@ -52,6 +52,7 @@ function init() {
 	document.onkeyup = keyDoNothing;
 	// display proper screen
 	document.getElementById('start').style.display = 'block';
+	document.getElementById('options').style.display = 'block';
         document.getElementById('nojs').style.display = 'none';
         document.getElementById('play').style.display = 'none';
 	// holds the time the currently running clock started
@@ -199,26 +200,34 @@ function startMatch() {
 		document.getElementById('SimpleDelayDisplay').style.display='none';
         }
 
-
-	// Time Warning Options
-	if (document.getElementById('TimeWarning').checked) {
-		timeWarningSecs = Math.max(0,parseInt(document.getElementById('TimeWarningSecs').value));
-		if (isNaN(timeWarningSecs)) {
-                        alert('We could not parse the number of seconds you requested a warning at as a recognised number. Please try again.');
-                        return;
-		}
-                setCookie('timeWarningSecs',timeWarningSecs);
-                setCookie('timeWarning','on');
-	} else { 
-		timeWarningSecs = 0; 
-		setCookie('timeWarning','off');
-	}
-
 	document.getElementById('start').style.display = 'none';
+	document.getElementById('options').style.display = 'none';
 	document.getElementById('play').style.display = 'block';
 	
 	setCookie('mode',mode);
 	update();
+	colourClocks(players[0],players[1]);
+}
+
+function userChangedTimeWarningsOptions() {
+	// Time Warning Options
+	if (document.getElementById('TimeWarning').checked) {
+		timeWarningSecs = Math.max(0,parseInt(document.getElementById('TimeWarningSecs').value));
+		if (isNaN(timeWarningSecs)) {
+                        setError('errorTimeWarnings','We could not parse the number of seconds you requested a warning at as a recognised number.');
+                        timeWarningSecs = 0; 
+			setCookie('timeWarning','off');
+		} else {
+			document.getElementById('errorTimeWarnings').style.display = 'none';
+			setCookie('timeWarningSecs',timeWarningSecs);
+			setCookie('timeWarning','on');
+		}
+	} else { 
+		document.getElementById('errorTimeWarnings').style.display = 'none';       
+		timeWarningSecs = 0; 
+		setCookie('timeWarning','off');
+	}
+
 }
 
 function update() {
@@ -239,10 +248,7 @@ function update() {
 		}
 		timenow[moving] = timenow[moving] - diff;
 
-		// the +1000 is so that the timer turns red on the time set, and not just when below the time set.
-		if (timeWarningSecs > 0 && timenow[moving] < (timeWarningSecs * 1000 + 1000)) {
-			document.getElementById('player'+(moving+1)).style.color = 'red';
-		}
+		colourClocks(timenow[0],timenow[1]);
 	}
 
 	// if match has ended .......
@@ -270,6 +276,23 @@ function zeropad(innum) {
 	if (innum < 10) { return "0"+parseInt(innum); } else { return parseInt(innum); }
 }
 
+/* This func colours the players clocks depending on the time they have left and the settings.
+   Could be called on any of those variables changing, so you must cover all eventualities. 
+   These 2 params have to be passed in as it's not always possible to get this info from the global state. **/
+function colourClocks(player1time,player2time) {
+	// the +1000 is so that the timer turns red on the time set, and not just when below the time set.
+	if (timeWarningSecs > 0 && player1time <= (timeWarningSecs * 1000 + 1000)) {
+		document.getElementById('player1').style.color = 'red';
+	} else {
+		document.getElementById('player1').style.color = 'white';
+	}
+	if (timeWarningSecs > 0 && player2time <= (timeWarningSecs * 1000 + 1000)) {
+		document.getElementById('player2').style.color = 'red';
+	} else {
+		document.getElementById('player2').style.color = 'black';
+	}
+}
+
 function clickPlayer(player) {
 	if (moving == -2) { return; }
 	else if (player == moving) {
@@ -289,10 +312,7 @@ function clickPlayer(player) {
 		// modes that add time before a move
 		if (mode == 'fischerBefore') players[moving] = players[moving] + fischerSecs[moving] * 1000;
 		// we may have now added enought time that we have to turn clocks from red back to original colour ...
-		if (timeWarningSecs > 0) {
-			if (players[0] >= (timeWarningSecs * 1000 + 1000)) document.getElementById('player1').style.color = 'white';
-			if (players[1] >= (timeWarningSecs * 1000 + 1000)) document.getElementById('player2').style.color = 'black';
-		}
+		//  ... however this is now handled in the call to update() below.
 		// set up for this move, and ui.
 		LastTouch = new Date();
 		update();
@@ -310,6 +330,9 @@ function clickPlayer(player) {
 }
 
 function key(e) {
+	// as we disable and re-enable the handler at appropiate points anyway (start, end, pause)
+	// the next line is just for safety and isn't really needed. So commented out for now.
+	//if (moving != 0 && moving != 1) return;
 	var k = (window.event) ? event.keyCode : e.keyCode;
 	if (keyboardLayout == "uk-qwerty") {
 		if (k == 49 || k == 50 || k == 51 || k == 52 || k == 53 || k == 81 || k == 113 || k == 87 || k == 119 || k == 69 || k == 101 || k == 84 || k == 116 || k == 65 || k == 97 || k == 83 || k == 115 || k == 68 || k == 100 || k == 70 || k == 102 || k == 71 || k == 103 || k == 90 || k == 122 || k == 88 || k == 120 || k == 67 || k == 99 || k == 86 || k == 118) {
@@ -347,11 +370,16 @@ function startPause() {
 		pauseStarted = new Date();
 		document.getElementById('play').style.display = 'none';
 		document.getElementById('paused').style.display = 'block';
+		document.getElementById('options').style.display = 'block';
+		document.onkeyup = keyDoNothing;
 	}
 }
 
 function endPause() {
+	document.onkeyup = key;
 	document.getElementById('paused').style.display = 'none';
+	document.getElementById('options').style.display = 'none';
+	colourClocks(players[0],players[1]); // bug, this should really take into account the time elapsed this move.
 	document.getElementById('play').style.display = 'block';
 	var now = new Date();
 	LastTouch.setTime(LastTouch.getTime() + (now.getTime() - pauseStarted.getTime()));	
@@ -405,6 +433,9 @@ function onPageLoad() {
 		diffStartTimesForm(false);
 	}
 
+	// note in all that follows, even if the option is turned off the settings are still loaded.
+	// we want to load as much of the users last choices as possible, for a more friendly UI.
+
 	// fischer
 	if (getCookie('mode') == 'fischerBefore') {
 		selectMode('Fischer');
@@ -427,14 +458,12 @@ function onPageLoad() {
         if (getCookie('mode') == 'simpleDelay') selectMode('SimpleDelay');
 
 	// time warnings
-	var warning = parseInt(getCookie('timeWarningSecs'));
-	if (!isNaN(warning) && warning > 0) {
-		document.getElementById('TimeWarningSecs').value = warning;
-		document.getElementById('TimeWarning').checked = true;
-	}
-        if (getCookie('timeWarning') == 'off') {
-                document.getElementById('TimeWarning').checked = false;
-        }
+	// default is on, so we only need to check if user turned it off.
+	if (getCookie('timeWarning') == 'off') document.getElementById('TimeWarning').checked = false;
+	if (getCookie('timeWarningSecs')) document.getElementById('TimeWarningSecs').value = getCookie('timeWarningSecs');
+	// now call this to ensure global state variables are set correctly.
+	userChangedTimeWarningsOptions();
+
 	// keyboard layout
 	var kbLayout = getCookie('kbLayout');
 	if (kbLayout) {
@@ -568,23 +597,28 @@ function selectMode(newMode) {
 			</p>
 		</fieldset>
 		<p><input style="font-size: 200%; padding: 10px" value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
-		<fieldset>
-			<legend>Options</legend>
-			<p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" value="5" size="2"> seconds left.</p>
-			<p>Keyboard Layout: 
-			<select id="KbLayout" onchange="keyboardLayout = this.value; setCookie('kbLayout',this.value);">
-				<option value="uk-qwerty" selected>UK/USA</option>
-				<option value="uk-dvorak">UK/USA Dvorak</option>
-				<option value="numerickeypad">Numeric Keypad with num lock on (Left:1,4,7 Right: 3,6,9)</option> 
-			</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
-		</fieldset>
 	</form>
 </div>
+
+
 
 <div id="paused" style=" display: none; text-align: center;">
 	The clocks are paused. <a href="#" onclick="endPause(); return false;">Start clocks again</a>.
 </div>
 
+<div id="options" style="display: none;">
+	<fieldset>
+		<legend>Options</legend>
+		<span id="errorTimeWarnings" class="error"></span>
+		<p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked" onchange="userChangedTimeWarningsOptions();"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" size="2" value="5" onchange="userChangedTimeWarningsOptions();"> seconds left.</p>
+		<p>Keyboard Layout: 
+		<select id="KbLayout" onchange="keyboardLayout = this.value; setCookie('kbLayout',this.value);">
+			<option value="uk-qwerty" selected>UK/USA</option>
+			<option value="uk-dvorak">UK/USA Dvorak</option>
+			<option value="numerickeypad">Numeric Keypad with num lock on (Left:1,4,7 Right: 3,6,9)</option> 
+		</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
+	</fieldset>
+</div>
 
 </body>
 </html>

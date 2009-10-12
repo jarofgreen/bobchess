@@ -55,6 +55,7 @@ function init() {
 	document.getElementById('options').style.display = 'block';
         document.getElementById('nojs').style.display = 'none';
         document.getElementById('play').style.display = 'none';
+	document.getElementById('paused').style.display = 'none';
 	// holds the time the currently running clock started
 	LastTouch = false;
 	// holds how much time each player has left in milliseconds
@@ -194,16 +195,18 @@ function startMatch() {
 		}
                 setCookie('simpleDelaySecs',simpleDelaySecs[0]);
 		mode = 'simpleDelay';
-		document.getElementById('SimpleDelayDisplay').style.display='block';
         } else {
                 simpleDelaySecs = new Array(0,0);
-		document.getElementById('SimpleDelayDisplay').style.display='none';
         }
 
 	document.getElementById('start').style.display = 'none';
 	document.getElementById('options').style.display = 'none';
+	document.getElementById('ReturnToMenuLinkFromGame').style.display = 'none';
+	document.getElementById('PauseAndOptionsFromGame').style.display = 'block';
 	document.getElementById('play').style.display = 'block';
-	
+	document.getElementById('SimpleDelayDisplay').style.textAlign='center';
+	document.getElementById('SimpleDelayDisplay').innerHTML = 'The first player to move should click on their own clock to start the game.';
+
 	setCookie('mode',mode);
 	update();
 	colourClocks(players[0],players[1]);
@@ -252,8 +255,14 @@ function update() {
 	}
 
 	// if match has ended .......
-	if (timenow[0] <= 0) { players[0] = 0; moving = -2; stopTimer(); }
-	if (timenow[1] <= 0) { players[1] = 0; moving = -2; stopTimer(); }
+	if (timenow[0] <= 0 || timenow[1] <= 0) { 
+		if (timenow[0] <= 0) players[0] = 0; 
+		if (timenow[1] <= 0) players[1] = 0; 
+		moving = -2; 
+		stopTimer(); 
+		document.getElementById('ReturnToMenuLinkFromGame').style.display = 'block';
+		document.getElementById('PauseAndOptionsFromGame').style.display = 'none';
+	}
 
 	document.getElementById('player1').value = renderTime(timenow[0]);
 	document.getElementById('player2').value = renderTime(timenow[1]);
@@ -319,6 +328,7 @@ function clickPlayer(player) {
 		if (moving == 0) { document.getElementById('player1').focus(); } else {  document.getElementById('player2').focus(); }
 	} else if (moving == -1) {
 		// we are starting the match
+		document.getElementById('SimpleDelayDisplay').innerHTML = '&nbsp;';
 		document.onkeyup = key;
 		moving = player;
 		document.getElementById('player'+(moving+1)).style.fontSize='800%';
@@ -359,7 +369,11 @@ function key(e) {
 function keyDoNothing(e) {}
 
 function reset() {
-	if (confirm('Are you sure you want to reset the current game?')) init();
+	if (moving == 0 || moving == 1) {
+		if (confirm('Are you sure you want to reset the current game?')) init();
+	} else {
+		init();
+	}
 }
 
 var pauseStarted;
@@ -532,9 +546,10 @@ function selectMode(newMode) {
 	</td><td  style=" width:50%; padding: 10px;">
 		<input type="button" style=" font-size:300%; width:100%; height:100%; text-align: right; background-color: #ccc;  padding: 10px;" id="player2" onclick="clickPlayer(1);">
 	</td></tr></table>
-	<br>
-	(<a href="#" onclick="reset(); return false;">reset timers</a>) 
-	(<a href="#" onclick="startPause(); return false;">pause</a>)
+	<div>
+		<span id="PauseAndOptionsFromGame">(<a href="#" onclick="startPause(); return false;">pause & other options</a>)</span>
+		<span id="ReturnToMenuLinkFromGame"><input type="button" value="Return to menu  &gt; &gt; &gt;" onclick="reset(); return false;"></span>
+	</div>
 </div>
 
 <div id="start" style="display: none;">
@@ -542,8 +557,6 @@ function selectMode(newMode) {
 	<form>
 		<div style="margin: 10px; float: right; width: 20%; padding: 10px; background-color: #400000; color: white; ">
 			<strong>Instructions</strong>
-			<p>Set the options you want and click "Start". Two buttons will appear, with the times displayed.</p>
-			<p>To start the clocks running click on either one of them. The clock you click on will start counting down.</p>
 			<p>When a players clock is running, they can press a number or letter key on their side of the keyboard or click their clock with the mouse to end their go and start their opponents clock running.</p>
 			<p>There is a pause button on the bottom of the screen.</p>
 			<p><em>This is Open Source. If you want to download a copy of this program to use when not connected to the internet, simply select 'file' and 'save' in your web browser. <a href="http://code.google.com/p/bobchess/" style="color: white;">Find out more here</a></em></p>
@@ -603,7 +616,9 @@ function selectMode(newMode) {
 
 
 <div id="paused" style=" display: none; text-align: center;">
-	The clocks are paused. <a href="#" onclick="endPause(); return false;">Start clocks again</a>.
+	<p>The clocks are paused.</p> 
+	<p><input type="button" onclick="endPause(); return false;" value="Start clocks again &gt; &gt; &gt;"></p>
+	<p><input type="button" value="Quit game and return to menu  &gt; &gt; &gt;" onclick="reset(); return false;"></p>
 </div>
 
 <div id="options" style="display: none;">

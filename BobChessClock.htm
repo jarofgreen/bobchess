@@ -39,6 +39,7 @@ var simpleDelaySecs;
 var keyboardLayout = "uk-qwerty";
 var differentTimeForEachPlayer = false;
 var mode;
+var clockSpeed = 100;
 
 function stopTimer() {
 	if (timer == undefined) return;
@@ -212,6 +213,16 @@ function startMatch() {
 	colourClocks(players[0],players[1]);
 }
 
+function userChangedSlowerClockOptions() {
+	if (document.getElementById('SlowerClock').checked) {
+		clockSpeed = 400; 
+		setCookie('clockSpeed','slow');
+	} else {
+		clockSpeed = 100; 
+		setCookie('clockSpeed','fast');
+	}
+}
+
 function userChangedTimeWarningsOptions() {
 	// Time Warning Options
 	if (document.getElementById('TimeWarning').checked) {
@@ -333,7 +344,7 @@ function clickPlayer(player) {
 		moving = player;
 		document.getElementById('player'+(moving+1)).style.fontSize='800%';
 		if (mode == 'fischerBefore') players[moving] = players[moving] + fischerSecs[moving] * 1000;
-		timer = setInterval("update()",400);
+		timer = setInterval("update()",clockSpeed);
 		LastTouch = new Date();
 		update();
 	}
@@ -398,7 +409,7 @@ function endPause() {
 	var now = new Date();
 	LastTouch.setTime(LastTouch.getTime() + (now.getTime() - pauseStarted.getTime()));	
 	pauseStarted = false;
-	timer = setInterval("update()",400);
+	timer = setInterval("update()",clockSpeed);
 }
 
 function confirmExit() {
@@ -477,6 +488,13 @@ function onPageLoad() {
 	if (getCookie('timeWarningSecs')) document.getElementById('TimeWarningSecs').value = getCookie('timeWarningSecs');
 	// now call this to ensure global state variables are set correctly.
 	userChangedTimeWarningsOptions();
+
+	// Clock Speed
+	if (getCookie('clockSpeed') == "slow") {
+		document.getElementById('SlowerClock').checked = true;
+		// now call this to ensure global state variables are set correctly.
+		userChangedSlowerClockOptions();
+	}
 
 	// keyboard layout
 	var kbLayout = getCookie('kbLayout');
@@ -632,6 +650,7 @@ function selectMode(newMode) {
 			<option value="uk-dvorak">UK/USA Dvorak</option>
 			<option value="numerickeypad">Numeric Keypad with num lock on (Left:1,4,7 Right: 3,6,9)</option> 
 		</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
+		<p><input type="checkbox" name="SlowerClock" id="SlowerClock" onchange="userChangedSlowerClockOptions();"><label for="SlowerClock">Slower screen-updates. (Use on slower computers)</label></p>
 	</fieldset>
 </div>
 

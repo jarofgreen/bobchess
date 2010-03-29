@@ -468,18 +468,26 @@ function startPause() {
 		document.getElementById('options').style.display = 'block';
 		document.onkeyup = keyDoNothing;
 	}
+	if (moving == -1 && !pauseStarted) {
+		document.getElementById('play').style.display = 'none';
+        	document.getElementById('paused').style.display = 'block';
+        	document.getElementById('options').style.display = 'block';
+        	document.onkeyup = keyDoNothing;
+	}
 }
 
 function endPause() {
-	document.onkeyup = key;
 	document.getElementById('paused').style.display = 'none';
 	document.getElementById('options').style.display = 'none';
-	colourClocks(players[0],players[1]); // bug, this should really take into account the time elapsed this move.
 	document.getElementById('play').style.display = 'block';
-	var now = new Date();
-	LastTouch.setTime(LastTouch.getTime() + (now.getTime() - pauseStarted.getTime()));	
-	pauseStarted = false;
-	timer = setInterval("update()",clockSpeed);
+	document.onkeyup = key;
+	if (moving > -1) {
+		colourClocks(players[0],players[1]); // bug, this should really take into account the time elapsed this move.
+		var now = new Date();
+		LastTouch.setTime(LastTouch.getTime() + (now.getTime() - pauseStarted.getTime()));	
+		pauseStarted = false;
+		timer = setInterval("update()",clockSpeed);
+	}
 }
 
 function confirmExit() {
@@ -705,7 +713,7 @@ function selectMode(newMode) {
 
 <div id="paused" style=" display: none; text-align: center;">
 	<p>The clocks are paused.</p> 
-	<p><input type="button" onclick="endPause(); return false;" value="Start clocks again &gt; &gt; &gt;"></p>
+	<p><input type="button" onclick="endPause(); return false;" value="Continue current game &gt; &gt; &gt;"></p>
 	<p><input type="button" value="Quit game and return to menu  &gt; &gt; &gt;" onclick="reset(); return false;"></p>
 </div>
 

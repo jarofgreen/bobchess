@@ -97,6 +97,8 @@ var moving;
 // pointer to timer that updates screen so it can be stopped later
 var timer;
 var fischerSecs;
+var randomMinSecs;
+var randomMaxSecs;
 var timeWarningSecs;
 var bronsteinSecs;
 var simpleDelaySecs;
@@ -135,6 +137,9 @@ function init() {
 	bronsteinSecs = new Array(0,0);
 	// simple delay mode
 	simpleDelaySecs = new Array(0,0);	
+	// random
+	randomMinSecs = new Array(0,0);
+	randomMaxSecs = new Array(0,0);
 	// warn by turning clocks red when there a certain number of seconds left, 0 to disable.
 	timeWarningSecs = 0;
 	// set ui to normal colours and size
@@ -154,6 +159,7 @@ function startMatch() {
 	document.getElementById('errorFischer').style.display = 'none';
 	document.getElementById('errorSimpleDelay').style.display = 'none';
 	document.getElementById('errorBronstein').style.display = 'none';
+	document.getElementById('errorRandom').style.display = 'none';
 	// storing prefs in cookies as we go so we can load them later .......
 	// calculate start time
 	var time = Math.max(0,parseInt(document.getElementById('Hrs').value))*60*60 
@@ -263,6 +269,59 @@ function startMatch() {
         } else {
                 simpleDelaySecs = new Array(0,0);
         }
+
+        // Random options
+        if (document.getElementById('Random').checked) {
+                randomMinSecs = Math.max(0,parseInt(document.getElementById('MinRandomSecs').value));
+                if (isNaN(randomMinSecs)) {
+                        setError('errorRandom','We could not parse the number of min seconds you requested as a recognised number. Please try again.');
+                        return;
+                }
+                randomMinSecs = new Array( randomMinSecs, randomMinSecs );
+                randomMaxSecs = Math.max(0,parseInt(document.getElementById('MaxRandomSecs').value));
+                if (isNaN(randomMaxSecs)) {
+                        setError('errorRandom','We could not parse the number of max seconds you requested as a recognised number. Please try again.');
+                        return;
+                }
+                randomMaxSecs = new Array( randomMaxSecs, randomMaxSecs );
+		if (randomMinSecs[0] >= randomMaxSecs[0]) {
+			setError('errorRandom','Max must be more than min!');
+                        return;
+                }
+
+                if (differentTimeForEachPlayer) {
+                        randomMinSecs[1] = Math.max(0,parseInt(document.getElementById('MinRandomSecsRHP').value));
+                        if (isNaN(randomMinSecs[1])) {
+                                setError('errorRandom','We could not parse the min number of seconds you requested for the right hand player as a recognised number. Please try again');
+                                return;
+                        }
+                        randomMaxSecs[1] = Math.max(0,parseInt(document.getElementById('MaxRandomSecsRHP').value));
+                        if (isNaN(randomMaxSecs[1])) {
+                                setError('errorRandom','We could not parse the max number of seconds you requested for the right hand player as a recognised number. Please try again');
+                                return;
+                        }
+			if (randomMinSecs[1]  >= randomMaxSecs[1]){ 
+				setError('errorRandom','Max must be more than min for the right hand player!');
+				return;
+                        }
+
+                        setCookie('randomMinSecsRHP',randomMinSecs[1]);
+			setCookie('randomMaxSecsRHP',randomMaxSecs[1]);
+                }
+                setCookie('fischerMinSecs',randomMinSecs[0]);
+		setCookie('fischerMaxSecs',randomMaxSecs[0]);
+                var ele = document.getElementById('RandomMode');
+                if (ele.options[ele.selectedIndex].value == "0") {
+                        mode = 'randomBefore';
+                } else {
+                        mode = 'randomAfter';
+                }
+        } else {
+                randomMinSecs = new Array(0,0);
+		randomMaxSecs = new Array(0,0);
+        }
+
+
 
 	document.getElementById('start').style.display = 'none';
 	document.getElementById('options').style.display = 'none';
@@ -389,12 +448,20 @@ function clickPlayer(player) {
 		// modes that add time after move
 		if (mode == 'bronstein') players[moving] = players[moving] + Math.min(diff, bronsteinSecs[moving]*1000);
 		else if (mode == 'fischerAfter') players[moving] = players[moving] + fischerSecs[moving] * 1000;
+		else if (mode == 'randomAfter') {
+                        var r = Math.floor(Math.random()*(randomMaxSecs[moving]-randomMinSecs[moving]+1)) + randomMinSecs[moving];
+                        players[moving] = players[moving] + r*1000;
+		}
 		// switch players
 		document.getElementById('player'+(moving+1)).style.fontSize='300%';
 		if (player == 1 ) { moving = 0; } else { moving = 1; }
 		document.getElementById('player'+(moving+1)).style.fontSize='800%';
 		// modes that add time before a move
 		if (mode == 'fischerBefore') players[moving] = players[moving] + fischerSecs[moving] * 1000;
+		else if(mode == 'randomBefore') {
+			var r = Math.floor(Math.random()*(randomMaxSecs[moving]-randomMinSecs[moving]+1)) + randomMinSecs[moving];
+			players[moving] = players[moving] + r*1000; 
+		}
 		// we may have now added enought time that we have to turn clocks from red back to original colour ...
 		//  ... however this is now handled in the call to update() below.
 		// set up for this move, and ui.
@@ -560,6 +627,19 @@ function onPageLoad() {
 	if (getCookie('simpleDelaySecsRHP')) document.getElementById('SimpleDelaySecsRHP').value = getCookie('simpleDelaySecsRHP');
         if (getCookie('mode') == 'simpleDelay') selectMode('SimpleDelay');
 
+	// random
+	if (getCookie('randomMin')) document.getElementById('RandomMin').value = getCookie('randomMin');
+	if (getCookie('randomMax')) document.getElementById('RandomMax').value = getCookie('randomMax');
+ 	if (getCookie('randomMinRHP')) document.getElementById('RandomMinRHP').value = getCookie('randomMinRHP');
+	if (getCookie('randomMMaxRHP')) document.getElementById('RandomMaxRHP').value = getCookie('randomMaxRHP');	
+	if (getCookie('mode') == 'randomBefore') {
+		selectMode('Random');
+		document.getElementById('RandomMode').selectedIndex = 0;
+	} else if (getCookie('mode') == 'randomAfter') {
+                selectMode('Random');
+                document.getElementById('RandomMode').selectedIndex = 1;
+	}
+
 	// time warnings
 	// default is on, so we only need to check if user turned it off.
 	if (getCookie('timeWarning') == 'off') document.getElementById('TimeWarning').checked = false;
@@ -594,24 +674,28 @@ function diffStartTimesForm(show) {
 		document.getElementById('ForRHSPlayerFischer').style.display = 'inline';
 		document.getElementById('ForRHSPlayerSimpleDelay').style.display = 'inline';
 		document.getElementById('ForRHSPlayerBronstein').style.display = 'inline';
+		document.getElementById('ForRHSPlayerRandom').style.display = 'inline';
 		document.getElementById('HrsRHP').value = document.getElementById('Hrs').value;
 		document.getElementById('MinsRHP').value = document.getElementById('Mins').value;
 		document.getElementById('SecsRHP').value = document.getElementById('Secs').value;
 		document.getElementById('FischerSecsRHP').value = document.getElementById('FischerSecs').value;
 		document.getElementById('SimpleDelaySecsRHP').value = document.getElementById('SimpleDelaySecs').value;
 		document.getElementById('BronsteinSecsRHP').value = document.getElementById('BronsteinSecs').value;
+		document.getElementById('RandomMinRHP').value = document.getElementById('RandomMin').value;
+		document.getElementById('RandomMaxRHP').value = document.getElementById('RandomMax').value;
 	} else {
 		document.getElementById('StartTimeForRightPlayer').style.display = 'none';
 		document.getElementById('ForLHSPlayerLabel').style.display = 'none';
 		document.getElementById('ForRHSPlayerFischer').style.display = 'none';
 		document.getElementById('ForRHSPlayerSimpleDelay').style.display = 'none';
 		document.getElementById('ForRHSPlayerBronstein').style.display = 'none';
+		document.getElementById('ForRHSPlayerRandom').style.display = 'none';
 	}
 }
 function selectMode(newMode) {
 	// this function could be called because the user clicked something or we are setting the users last used options from their cookies. In the latter case this line is needed, but but not the former.
 	if (document.getElementById(newMode) && !document.getElementById(newMode).checked) document.getElementById(newMode).checked = true;
-	var modes = new Array('Fischer','SimpleDelay','Bronstein');
+	var modes = new Array('Fischer','SimpleDelay','Bronstein','Random');
 	for (var i in modes) {
 		// avoid flickering screens, as this function is called on many events: so don't want to hide then show a split second later.
 		if (modes[i] != newMode) {
@@ -635,7 +719,7 @@ function selectMode(newMode) {
 	You seem not to have JavaScript enabled. Without it,  <a href="http://code.google.com/p/bobchess/">BobChess</a> will not run. 
 </noscript>
 
-<div id="play">
+<div id="play"  style="display: none;">
 	<div id="SimpleDelayDisplay">&nbsp;</div> 
 	<table><tr><td>
 		<input type="button" id="player1" onclick="clickPlayer(0);">
@@ -704,6 +788,19 @@ function selectMode(newMode) {
 					<span id="ForRHSPlayerBronstein"  style="display: none;">for the left hand player and <input type="text" id="BronsteinSecsRHP" size="2" value="5"> seconds for the right hand player</span>.
 				</span>
 			</p>
+                        <span id="errorRandom" class="error"></span>
+                        <p>
+                                <input type="radio" name="Mode" id="Random" onchange="if (this.checked) selectMode('Random');" onclick="if (this.checked) selectMode('Random');" onkeyup="if (this.checked) selectMode('Random');">
+                                <span id="RandomShortText">
+                                        <label for="Random">Random Fischer Clock; add some random amount of time before or after every move.</label>
+                                </span>
+                                <span id="RandomOptions" style="display: none;">
+                                        <label for="Random">Random Clock; add from </label><input type="text" id="MinRandomSecs" value="5" size="2"> to <input type="text" id="MaxRandomSecs" value="60" size="2"> seconds
+                                        <span id="ForRHSPlayerRandom"  style="display: none;"> for the left hand player and from <input type="text" id="MinRandomSecsRHP" value="5" size="2"> to <input type="text" id="MaxRandomSecsRHP" value="60" size="2"> seconds for the right hand</span>
+                                        <select id="RandomMode"><option value=0>Before</option><option value=1>After</option></select> every move. 
+                                </span>
+                        </p>
+
 		</fieldset>
 		<p><input style="font-size: 200%; padding: 10px" value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
 	</form>

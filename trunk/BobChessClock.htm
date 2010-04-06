@@ -477,7 +477,13 @@ function clickPlayer(player) {
 		document.onkeyup = key;
 		moving = player;
 		document.getElementById('player'+(moving+1)).style.fontSize='800%';
+		//  modes that add time before a move
 		if (mode == 'fischerBefore') players[moving] = players[moving] + fischerSecs[moving] * 1000;
+		else if(mode == 'randomBefore') {
+			var r = Math.floor(Math.random()*(randomMaxSecs[moving]-randomMinSecs[moving]+1)) + randomMinSecs[moving];
+			players[moving] = players[moving] + r*1000;
+		}
+		// more setup
 		timer = setInterval("update()",clockSpeed);
 		LastTouch = new Date();
 		update();

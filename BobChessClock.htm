@@ -106,6 +106,7 @@ var keyboardLayout = "uk-qwerty";
 var differentTimeForEachPlayer = false;
 var mode;
 var clockSpeed = 100;
+var pauseStarted;
 
 function stopTimer() {
 	if (timer == undefined) return;
@@ -142,6 +143,8 @@ function init() {
 	randomMaxSecs = new Array(0,0);
 	// warn by turning clocks red when there a certain number of seconds left, 0 to disable.
 	timeWarningSecs = 0;
+	// not in pause mode
+	pauseStarted = false;
 	// set ui to normal colours and size
 	document.getElementById('player1').style.color = 'white';
 	document.getElementById('player2').style.color = 'black';
@@ -523,8 +526,6 @@ function reset() {
 		init();
 	}
 }
-
-var pauseStarted;
 
 function startPause() {
 	if ((moving == 0 || moving == 1) && !pauseStarted) {

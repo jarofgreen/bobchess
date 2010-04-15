@@ -107,6 +107,7 @@ var differentTimeForEachPlayer = false;
 var mode;
 var clockSpeed = 100;
 var pauseStarted;
+var playSounds = true;
 
 function stopTimer() {
 	if (timer == undefined) return;
@@ -349,6 +350,17 @@ function userChangedSlowerClockOptions() {
 	}
 }
 
+function userChangedPlaySoundOptions() {
+	if (document.getElementById('PlaySounds').checked) {
+		playSounds = true;
+		setCookie('playSounds','yes');
+	} else {
+		playSounds = false; 
+		setCookie('playSounds','no');
+	}
+
+}
+
 function userChangedTimeWarningsOptions() {
 	// Time Warning Options
 	if (document.getElementById('TimeWarning').checked) {
@@ -471,6 +483,7 @@ function clickPlayer(player) {
 		LastTouch = new Date();
 		update();
 		if (moving == 0) { document.getElementById('player1').focus(); } else {  document.getElementById('player2').focus(); }
+		playSwitchPlayerSound();
 	} else if (moving == -1) {
 		// we are starting the match
 		document.getElementById('SimpleDelayDisplay').innerHTML = '&nbsp;';
@@ -487,6 +500,7 @@ function clickPlayer(player) {
 		timer = setInterval("update()",clockSpeed);
 		LastTouch = new Date();
 		update();
+		playSwitchPlayerSound();
 	}
 }
 
@@ -661,6 +675,13 @@ function onPageLoad() {
 		userChangedSlowerClockOptions();
 	}
 
+	if (getCookie('playSounds') == "no") {
+		document.getElementById('PlaySounds').checked = false;
+		// now call this to ensure global state variables are set correctly.
+		userChangedPlaySoundOptions();
+	}
+
+
 	// keyboard layout
 	var kbLayout = getCookie('kbLayout');
 	if (kbLayout) {
@@ -672,6 +693,13 @@ function onPageLoad() {
 			} 
 		}
 	}
+	
+}
+
+function playSwitchPlayerSound() {
+	if (!playSounds) return false;
+	var sound =  document.getElementById('PlayerChangedSound');
+	if (sound.play) sound.play();
 }
 
 function diffStartTimesForm(show) {
@@ -746,7 +774,7 @@ function selectMode(newMode) {
 			<h2>Instructions</h2>
 			<p>When a players clock is running, they can press a number or letter key on their side of the keyboard or click their clock with the mouse to end their go and start their opponents clock running.</p>
 			<p>There is a pause button on the bottom of the screen.</p>
-			<p><em>This is Open Source. If you want to download a copy of this program to use when not connected to the internet, simply select 'file' and 'save' in your web browser. <a href="http://code.google.com/p/bobchess/" style="color: white;">Find out more here</a></em></p>
+			<p><em>This is Open Source. To download a copy of this program to use when not connected to the internet or to find out more, <a href="http://code.google.com/p/bobchess/" style="color: white;">visit the homepage</a></em></p>
 		</div>
 		<fieldset>
 			<legend>Start Time</legend>
@@ -834,8 +862,15 @@ function selectMode(newMode) {
 			<option value="numerickeypad">Numeric Keypad with num lock on (Left:1,4,7 Right: 3,6,9)</option> 
 		</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
 		<p><input type="checkbox" name="SlowerClock" id="SlowerClock" onchange="userChangedSlowerClockOptions();"><label for="SlowerClock">Slower screen-updates. (Use on slower computers)</label></p>
+		<p><input type="checkbox" name="PlaySounds" id="PlaySounds" onchange="userChangedPlaySoundOptions();" checked="checked"><label for="PlaySounds">Play sounds. (Only in certain browsers)</label></p>
+
 	</fieldset>
 </div>
+
+<audio id="PlayerChangedSound">
+	<source src="playerChanged.wav">
+	<source src="playerChanged.ogg">
+</audio>
 
 </body>
 </html>

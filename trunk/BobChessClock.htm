@@ -90,7 +90,135 @@ div#play table td input#player2 {
 	text-align:right;
 }
 </style>
-<script>
+</head>
+<body onload="init(); onPageLoad();">
+
+<div id="nojs">
+	 Loading, please wait ... 
+</div>
+<noscript>
+	You seem not to have JavaScript enabled. Without it,  <a href="http://code.google.com/p/bobchess/">BobChess</a> will not run. 
+</noscript>
+
+<div id="play"  style="display: none;">
+	<div id="SimpleDelayDisplay">&nbsp;</div> 
+	<table><tr><td>
+		<input type="button" id="player1" onclick="clickPlayer(0);">
+	</td><td >
+		<input type="button" id="player2" onclick="clickPlayer(1);">
+	</td></tr></table>
+	<div>
+		<span id="PauseAndOptionsFromGame">(<a href="#" onclick="startPause(); return false;">pause & other options</a>)</span>
+		<span id="ReturnToMenuLinkFromGame"><input type="button" value="Return to menu  &gt; &gt; &gt;" onclick="reset(); return false;"></span>
+	</div>
+</div>
+
+<div id="start" style="display: none;">
+	<h1>BobChess Online Chess Clock</h1>
+	<form>
+		<div class="helpbox">
+			<h2>Instructions</h2>
+			<p>When a players clock is running, they can press a number or letter key on their side of the keyboard or click their clock with the mouse to end their go and start their opponents clock running.</p>
+			<p>There is a pause button on the bottom of the screen.</p>
+			<p><em>This is Open Source. To download a copy of this program to use when not connected to the internet or to find out more, <a href="http://code.google.com/p/bobchess/" style="color: white;">visit the homepage</a></em></p>
+		</div>
+		<fieldset>
+			<legend>Start Time</legend>
+			<span id="errorStart" class="error"></span>
+			<p>Start Time <span id="ForLHSPlayerLabel" style="display: none;">for left hand player</span>: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
+			<p id="StartTimeForRightPlayer" style="display: none;">Start Time for right hand player: <input type=text id="HrsRHP" size="2" value="0">hrs:<input type=text id="MinsRHP" size="2" value="5">mins:<input type=text id="SecsRHP" size="2" value="00">secs</p>
+			<p><input type="checkbox" id="DiffStartTimes" onclick="diffStartTimesForm(this.checked);"><label for="DiffStartTimes">Different times for each player</label></p>
+		</fieldset>
+		<fieldset>
+			<legend>Mode</legend>
+			<p>
+				<input type="radio" name="Mode" id="NormalChess" checked="checked" onchange="if (this.checked) selectMode('Normal');" onclick="if (this.checked) selectMode('Normal');" onkeyup="if (this.checked) selectMode('Normal');">
+				<label for="NormalChess">Normal Chess Clock</label>
+			</p>
+			<span id="errorFischer" class="error"></span>
+			<p>
+				<input type="radio" name="Mode" id="Fischer" onchange="if (this.checked) selectMode('Fischer');" onclick="if (this.checked) selectMode('Fischer');" onkeyup="if (this.checked) selectMode('Fischer');">
+				<span id="FischerShortText">
+					<label for="Fischer">Fischer Clock; add some time before or after every move</label>
+				</span>
+				<span id="FischerOptions" style="display: none;">
+					<label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds 
+					<span id="ForRHSPlayerFischer"  style="display: none;"> for the left hand player and <input type="text" id="FischerSecsRHP" value="5" size="2"> seconds for the right hand player</span> 
+					<select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.
+				</span>
+			</p>
+			<span id="errorSimpleDelay" class="error"></span>
+			<p>
+				<input type="radio" name="Mode" id="SimpleDelay" onchange="if (this.checked) selectMode('SimpleDelay');" onclick="if (this.checked) selectMode('SimpleDelay');" onkeyup="if (this.checked) selectMode('SimpleDelay');">
+				<span id="SimpleDelayShortText">
+					<label for="SimpleDelay">Simple Delay; every move the clock waits before starting</label>
+				</span>
+				<span id="SimpleDelayOptions" style="display: none;">
+					<label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2"> seconds 
+					<span id="ForRHSPlayerSimpleDelay"  style="display: none;">for the left hand player and <input type="text" id="SimpleDelaySecsRHP" value="5" size="2"> seconds for the right hand player</span> before starting.
+				</span>
+			</p>
+			<span id="errorBronstein" class="error"></span>
+			<p>
+				<input type="radio" name="Mode" id="Bronstein" onchange="if (this.checked) selectMode('Bronstein');" onclick="if (this.checked) selectMode('Bronstein');" onkeyup="if (this.checked) selectMode('Bronstein');">
+				<span id="BronsteinShortText">
+					<label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a certain limit</label>
+				</span>
+				<span id="BronsteinOptions" style="display: none;">
+					<label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds 
+					<span id="ForRHSPlayerBronstein"  style="display: none;">for the left hand player and <input type="text" id="BronsteinSecsRHP" size="2" value="5"> seconds for the right hand player</span>.
+				</span>
+			</p>
+                        <span id="errorRandom" class="error"></span>
+                        <p>
+                                <input type="radio" name="Mode" id="Random" onchange="if (this.checked) selectMode('Random');" onclick="if (this.checked) selectMode('Random');" onkeyup="if (this.checked) selectMode('Random');">
+                                <span id="RandomShortText">
+                                        <label for="Random">Random Fischer Clock; add some random amount of time before or after every move.</label>
+                                </span>
+                                <span id="RandomOptions" style="display: none;">
+                                        <label for="Random">Random Clock; add from </label><input type="text" id="MinRandomSecs" value="5" size="2"> to <input type="text" id="MaxRandomSecs" value="60" size="2"> seconds
+                                        <span id="ForRHSPlayerRandom"  style="display: none;"> for the left hand player and from <input type="text" id="MinRandomSecsRHP" value="5" size="2"> to <input type="text" id="MaxRandomSecsRHP" value="60" size="2"> seconds for the right hand</span>
+                                        <select id="RandomMode"><option value=0>Before</option><option value=1>After</option></select> every move. 
+                                </span>
+                        </p>
+
+		</fieldset>
+		<p><input style="font-size: 200%; padding: 10px" value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
+	</form>
+</div>
+
+
+
+<div id="paused" style=" display: none; text-align: center;">
+	<p>The clocks are paused.</p> 
+	<p><input type="button" onclick="endPause(); return false;" value="Continue current game &gt; &gt; &gt;"></p>
+	<p><input type="button" value="Quit game and return to menu  &gt; &gt; &gt;" onclick="reset(); return false;"></p>
+</div>
+
+<div id="options" style="display: none;">
+	<fieldset>
+		<legend>Options</legend>
+		<span id="errorTimeWarnings" class="error"></span>
+		<p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked" onchange="userChangedTimeWarningsOptions();"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name="TimeWarningSecs" id="TimeWarningSecs" size="2" value="5" onchange="userChangedTimeWarningsOptions();"> seconds left.</p>
+		<p>Keyboard Layout: 
+		<select id="KbLayout" onchange="keyboardLayout = this.value; setCookie('kbLayout',this.value);">
+			<option value="uk-qwerty" selected>UK/USA</option>
+			<option value="uk-dvorak">UK/USA Dvorak</option>
+			<option value="finnish">Finnish/Swedish/Norwegian</option>
+			<option value="numerickeypad">Numeric Keypad with num lock on (Left:1,4,7 Right: 3,6,9)</option> 
+		</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
+		<p><input type="checkbox" name="SlowerClock" id="SlowerClock" onchange="userChangedSlowerClockOptions();"><label for="SlowerClock">Slower screen-updates. (Use on slower computers)</label></p>
+		<p><input type="checkbox" name="PlaySounds" id="PlaySounds" onchange="userChangedPlaySoundOptions();" checked="checked"><label for="PlaySounds">Play sounds. (Only in certain browsers)</label></p>
+
+	</fieldset>
+</div>
+
+<audio id="PlayerChangedSound">
+	<source src="playerChanged.wav">
+	<source src="playerChanged.ogg">
+</audio>
+
+<script type="text/javascript">
 var LastTouch;
 var players;
 var moving;
@@ -744,133 +872,7 @@ function selectMode(newMode) {
 	}
 }
 </script>
-</head>
-<body onload="init(); onPageLoad();">
 
-<div id="nojs">
-	 Loading, please wait ... 
-</div>
-<noscript>
-	You seem not to have JavaScript enabled. Without it,  <a href="http://code.google.com/p/bobchess/">BobChess</a> will not run. 
-</noscript>
-
-<div id="play"  style="display: none;">
-	<div id="SimpleDelayDisplay">&nbsp;</div> 
-	<table><tr><td>
-		<input type="button" id="player1" onclick="clickPlayer(0);">
-	</td><td >
-		<input type="button" id="player2" onclick="clickPlayer(1);">
-	</td></tr></table>
-	<div>
-		<span id="PauseAndOptionsFromGame">(<a href="#" onclick="startPause(); return false;">pause & other options</a>)</span>
-		<span id="ReturnToMenuLinkFromGame"><input type="button" value="Return to menu  &gt; &gt; &gt;" onclick="reset(); return false;"></span>
-	</div>
-</div>
-
-<div id="start" style="display: none;">
-	<h1>BobChess Online Chess Clock</h1>
-	<form>
-		<div class="helpbox">
-			<h2>Instructions</h2>
-			<p>When a players clock is running, they can press a number or letter key on their side of the keyboard or click their clock with the mouse to end their go and start their opponents clock running.</p>
-			<p>There is a pause button on the bottom of the screen.</p>
-			<p><em>This is Open Source. To download a copy of this program to use when not connected to the internet or to find out more, <a href="http://code.google.com/p/bobchess/" style="color: white;">visit the homepage</a></em></p>
-		</div>
-		<fieldset>
-			<legend>Start Time</legend>
-			<span id="errorStart" class="error"></span>
-			<p>Start Time <span id="ForLHSPlayerLabel" style="display: none;">for left hand player</span>: <input type=text id="Hrs" size="2" value="0">hrs:<input type=text id="Mins" size="2" value="5">mins:<input type=text id="Secs" size="2" value="00">secs</p>
-			<p id="StartTimeForRightPlayer" style="display: none;">Start Time for right hand player: <input type=text id="HrsRHP" size="2" value="0">hrs:<input type=text id="MinsRHP" size="2" value="5">mins:<input type=text id="SecsRHP" size="2" value="00">secs</p>
-			<p><input type="checkbox" id="DiffStartTimes" onclick="diffStartTimesForm(this.checked);"><label for="DiffStartTimes">Different times for each player</label></p>
-		</fieldset>
-		<fieldset>
-			<legend>Mode</legend>
-			<p>
-				<input type="radio" name="Mode" id="NormalChess" checked="checked" onchange="if (this.checked) selectMode('Normal');" onclick="if (this.checked) selectMode('Normal');" onkeyup="if (this.checked) selectMode('Normal');">
-				<label for="NormalChess">Normal Chess Clock</label>
-			</p>
-			<span id="errorFischer" class="error"></span>
-			<p>
-				<input type="radio" name="Mode" id="Fischer" onchange="if (this.checked) selectMode('Fischer');" onclick="if (this.checked) selectMode('Fischer');" onkeyup="if (this.checked) selectMode('Fischer');">
-				<span id="FischerShortText">
-					<label for="Fischer">Fischer Clock; add some time before or after every move</label>
-				</span>
-				<span id="FischerOptions" style="display: none;">
-					<label for="Fischer">Fischer Clock; add </label><input type="text" id="FischerSecs" value="5" size="2"> seconds 
-					<span id="ForRHSPlayerFischer"  style="display: none;"> for the left hand player and <input type="text" id="FischerSecsRHP" value="5" size="2"> seconds for the right hand player</span> 
-					<select id="FischerMode"><option value=0>Before</option><option value=1>After</option></select> every move.
-				</span>
-			</p>
-			<span id="errorSimpleDelay" class="error"></span>
-			<p>
-				<input type="radio" name="Mode" id="SimpleDelay" onchange="if (this.checked) selectMode('SimpleDelay');" onclick="if (this.checked) selectMode('SimpleDelay');" onkeyup="if (this.checked) selectMode('SimpleDelay');">
-				<span id="SimpleDelayShortText">
-					<label for="SimpleDelay">Simple Delay; every move the clock waits before starting</label>
-				</span>
-				<span id="SimpleDelayOptions" style="display: none;">
-					<label for="SimpleDelay">Simple Delay; every move the clock waits </label><input type="text" id="SimpleDelaySecs" value="5" size="2"> seconds 
-					<span id="ForRHSPlayerSimpleDelay"  style="display: none;">for the left hand player and <input type="text" id="SimpleDelaySecsRHP" value="5" size="2"> seconds for the right hand player</span> before starting.
-				</span>
-			</p>
-			<span id="errorBronstein" class="error"></span>
-			<p>
-				<input type="radio" name="Mode" id="Bronstein" onchange="if (this.checked) selectMode('Bronstein');" onclick="if (this.checked) selectMode('Bronstein');" onkeyup="if (this.checked) selectMode('Bronstein');">
-				<span id="BronsteinShortText">
-					<label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a certain limit</label>
-				</span>
-				<span id="BronsteinOptions" style="display: none;">
-					<label for="Bronstein">Bronstein Clock; the amount of time the player takes is added to their clock at the end of their move up to a limit of </label><input type="text" name="BronsteinSecs" id="BronsteinSecs" size="2" value="5"> seconds 
-					<span id="ForRHSPlayerBronstein"  style="display: none;">for the left hand player and <input type="text" id="BronsteinSecsRHP" size="2" value="5"> seconds for the right hand player</span>.
-				</span>
-			</p>
-                        <span id="errorRandom" class="error"></span>
-                        <p>
-                                <input type="radio" name="Mode" id="Random" onchange="if (this.checked) selectMode('Random');" onclick="if (this.checked) selectMode('Random');" onkeyup="if (this.checked) selectMode('Random');">
-                                <span id="RandomShortText">
-                                        <label for="Random">Random Fischer Clock; add some random amount of time before or after every move.</label>
-                                </span>
-                                <span id="RandomOptions" style="display: none;">
-                                        <label for="Random">Random Clock; add from </label><input type="text" id="MinRandomSecs" value="5" size="2"> to <input type="text" id="MaxRandomSecs" value="60" size="2"> seconds
-                                        <span id="ForRHSPlayerRandom"  style="display: none;"> for the left hand player and from <input type="text" id="MinRandomSecsRHP" value="5" size="2"> to <input type="text" id="MaxRandomSecsRHP" value="60" size="2"> seconds for the right hand</span>
-                                        <select id="RandomMode"><option value=0>Before</option><option value=1>After</option></select> every move. 
-                                </span>
-                        </p>
-
-		</fieldset>
-		<p><input style="font-size: 200%; padding: 10px" value="Start The Match" type=submit onclick="startMatch(); return false;"></p>
-	</form>
-</div>
-
-
-
-<div id="paused" style=" display: none; text-align: center;">
-	<p>The clocks are paused.</p> 
-	<p><input type="button" onclick="endPause(); return false;" value="Continue current game &gt; &gt; &gt;"></p>
-	<p><input type="button" value="Quit game and return to menu  &gt; &gt; &gt;" onclick="reset(); return false;"></p>
-</div>
-
-<div id="options" style="display: none;">
-	<fieldset>
-		<legend>Options</legend>
-		<span id="errorTimeWarnings" class="error"></span>
-		<p><input type="checkbox" name="TimeWarning" id="TimeWarning" checked="checked" onchange="userChangedTimeWarningsOptions();"><label for="TimeWarning">Turn clocks red when there is only</label> <input type="text" name=""TimeWarningSecs" id="TimeWarningSecs" size="2" value="5" onchange="userChangedTimeWarningsOptions();"> seconds left.</p>
-		<p>Keyboard Layout: 
-		<select id="KbLayout" onchange="keyboardLayout = this.value; setCookie('kbLayout',this.value);">
-			<option value="uk-qwerty" selected>UK/USA</option>
-			<option value="uk-dvorak">UK/USA Dvorak</option>
-			<option value="finnish">Finnish/Swedish/Norwegian</option>
-			<option value="numerickeypad">Numeric Keypad with num lock on (Left:1,4,7 Right: 3,6,9)</option> 
-		</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
-		<p><input type="checkbox" name="SlowerClock" id="SlowerClock" onchange="userChangedSlowerClockOptions();"><label for="SlowerClock">Slower screen-updates. (Use on slower computers)</label></p>
-		<p><input type="checkbox" name="PlaySounds" id="PlaySounds" onchange="userChangedPlaySoundOptions();" checked="checked"><label for="PlaySounds">Play sounds. (Only in certain browsers)</label></p>
-
-	</fieldset>
-</div>
-
-<audio id="PlayerChangedSound">
-	<source src="playerChanged.wav">
-	<source src="playerChanged.ogg">
-</audio>
 
 </body>
 </html>

@@ -218,6 +218,11 @@ div#play table td input#player2 {
 	<source src="playerChanged.ogg">
 </audio>
 
+<audio id="GameOverSound">
+	<source src="gameOver.wav">
+	<source src="gameOver.ogg">
+</audio>
+
 <script type="text/javascript">
 var LastTouch;
 var players;
@@ -539,6 +544,7 @@ function update() {
 		stopTimer(); 
 		document.getElementById('ReturnToMenuLinkFromGame').style.display = 'block';
 		document.getElementById('PauseAndOptionsFromGame').style.display = 'none';
+		playGameOverSound();
 	}
 
 	document.getElementById('player1').value = renderTime(timenow[0]);
@@ -830,6 +836,13 @@ function playSwitchPlayerSound() {
 	if (sound.play) sound.play();
 }
 
+function playGameOverSound() {
+	if (!playSounds) return false;
+	var sound =  document.getElementById('GameOverSound');
+	if (sound.play) sound.play();
+}
+
+
 function diffStartTimesForm(show) {
 	if (show) {
 		document.getElementById('StartTimeForRightPlayer').style.display = 'block';
@@ -872,6 +885,7 @@ function selectMode(newMode) {
 	}
 }
 </script>
+
 
 
 </body>

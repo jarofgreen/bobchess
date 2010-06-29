@@ -51,9 +51,13 @@ div.helpbox {
 div.helpbox h2 {
 	text-align:center;
 }
+div#graph {
+	width: 99%;
+	height: 49%;
+}
 div#play {
 	display:block;
-	height:99%;
+	height:49%;
 	text-align:center;
 	width:99%;
 }
@@ -209,9 +213,12 @@ div#play table td input#player2 {
 		</select> <a href="http://code.google.com/p/bobchess/wiki/KeyboardLayouts" target="_blank">Add More</a></p>
 		<p><input type="checkbox" name="SlowerClock" id="SlowerClock" onchange="userChangedSlowerClockOptions();"><label for="SlowerClock">Slower screen-updates. (Use on slower computers)</label></p>
 		<p><input type="checkbox" name="PlaySounds" id="PlaySounds" onchange="userChangedPlaySoundOptions();" checked="checked"><label for="PlaySounds">Play sounds. (Only in certain browsers)</label></p>
+		<p><input type="checkbox" name="ShowGraph" id="ShowGraph" onchange="userChangedShowGraphOptions();" checked="checked"><label for="ShowGraph">Show Graph of time players take</label></p>
 
 	</fieldset>
 </div>
+
+<div id="graph" style="display: none;"></div>
 
 <audio id="PlayerChangedSound">
 	<source src="playerChanged.wav">
@@ -223,6 +230,9 @@ div#play table td input#player2 {
 	<source src="gameOver.ogg">
 </audio>
 
+<script language="javascript" type="text/javascript" src="jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="excanvas.min.js"></script>
 <script type="text/javascript">
 var LastTouch;
 var players;
@@ -241,6 +251,8 @@ var mode;
 var clockSpeed = 100;
 var pauseStarted;
 var playSounds = true;
+var showGraph = true;
+var playerTimes = [];
 
 function stopTimer() {
 	if (timer == undefined) return;
@@ -256,6 +268,7 @@ function init() {
 	document.getElementById('start').style.display = 'block';
 	document.getElementById('options').style.display = 'block';
         document.getElementById('nojs').style.display = 'none';
+        document.getElementById('graph').style.display = 'none';
         document.getElementById('play').style.display = 'none';
 	document.getElementById('paused').style.display = 'none';
 	// holds the time the currently running clock started
@@ -279,6 +292,8 @@ function init() {
 	timeWarningSecs = 0;
 	// not in pause mode
 	pauseStarted = false;
+	// data for graph
+	playerTimes = new Array([],[]);
 	// set ui to normal colours and size
 	document.getElementById('player1').style.color = 'white';
 	document.getElementById('player2').style.color = 'black';
@@ -465,6 +480,10 @@ function startMatch() {
 	document.getElementById('ReturnToMenuLinkFromGame').style.display = 'none';
 	document.getElementById('PauseAndOptionsFromGame').style.display = 'block';
 	document.getElementById('play').style.display = 'block';
+	if (showGraph) {
+		$('#graph').html('');
+		document.getElementById('graph').style.display = 'block';
+	}
 	document.getElementById('SimpleDelayDisplay').style.textAlign='center';
 	document.getElementById('SimpleDelayDisplay').innerHTML = 'The first player to move should click on their own clock to start the game.';
 
@@ -480,6 +499,23 @@ function userChangedSlowerClockOptions() {
 	} else {
 		clockSpeed = 100; 
 		setCookie('clockSpeed','fast');
+	}
+}
+
+function userChangedShowGraphOptions()  {
+	if (document.getElementById('ShowGraph').checked) {
+		showGraph = true; 
+		setCookie('showGraph','1');
+		// if it was changed from the pause screen in the middle of a game, show immediately.
+		if (pauseStarted) {
+			$('#graph').show();
+			drawGraph();
+		} 
+	} else {
+		$('#graph').hide();
+		$('#graph').html('');
+		showGraph = false; 
+		setCookie('showGraph','0');
 	}
 }
 
@@ -552,6 +588,13 @@ function update() {
 
 }
 
+function drawGraph() {
+	if (showGraph && playerTimes[0].length > 1 && playerTimes[1].length > 1) {
+		$.plot($("#graph"), [ playerTimes[0], playerTimes[1] ]);
+	}
+
+}
+
 function renderTime(milliseconds) {
 	if (milliseconds < 1) { return 'Lose'; }
 	var seconds = parseInt(milliseconds / 1000);
@@ -589,9 +632,13 @@ function clickPlayer(player) {
 	if (moving == -2) { return; }
 	else if (player == moving) {
 		// normal move
-		// calculate diff, apply
+		// calculate diff
 		var now = new Date();
-		var diff = now.getTime() - LastTouch.getTime() - simpleDelaySecs[moving]*1000;
+		var timeTaken = now.getTime() - LastTouch.getTime();
+		// save to graph data
+		playerTimes[moving].push( [ playerTimes[moving].length, timeTaken/1000] );
+		// apply this to players clock.
+		var diff = timeTaken - simpleDelaySecs[moving]*1000;
 		if (diff < 0) diff = 0;
 		players[moving] = players[moving] - diff;
 		// modes that add time after move
@@ -616,8 +663,9 @@ function clickPlayer(player) {
 		// set up for this move, and ui.
 		LastTouch = new Date();
 		update();
-		if (moving == 0) { document.getElementById('player1').focus(); } else {  document.getElementById('player2').focus(); }
+		if (moving == 0) { document.getElementById('player1').focus(); } else {  document.getElementById('player2').focus(); }		
 		playSwitchPlayerSound();
+		drawGraph();
 	} else if (moving == -1) {
 		// we are starting the match
 		document.getElementById('SimpleDelayDisplay').innerHTML = '&nbsp;';
@@ -807,6 +855,13 @@ function onPageLoad() {
 		document.getElementById('SlowerClock').checked = true;
 		// now call this to ensure global state variables are set correctly.
 		userChangedSlowerClockOptions();
+	}
+
+	// misc options ...
+	if (getCookie('showGraph') == "0") {
+		document.getElementById('ShowGraph').checked = false;
+		// now call this to ensure global state variables are set correctly.
+		userChangedShowGraphOptions();
 	}
 
 	if (getCookie('playSounds') == "no") {
